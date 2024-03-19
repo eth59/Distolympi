@@ -20,6 +20,8 @@ typedef struct {
     float down;
 } Wall;
 
+// test commentaire
+
 void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
     /*
     QUAND ON VEUT LA HAUTEUR DU PERSONNAGE IL FAUT FAIRE *1.4
