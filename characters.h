@@ -1,0 +1,1 @@
+void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy);

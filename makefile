@@ -2,11 +2,18 @@ CC = gcc
 CFLAGS = $(shell sdl2-config --cflags)
 LIBS = $(shell sdl2-config --libs) -lSDL2_image
 
-SRC = moving_cube.c
-EXE = moving_cube
+SRC = $(wildcard *.c)
 
-all:
-	$(CC) $(SRC) $(CFLAGS) $(LIBS) -o $(EXE) && ./$(EXE)
+EXE = main
+
+all: $(EXE)
+	@./$(EXE)
+
+$(EXE): $(SRC)
+	$(CC) $(SRC) $(CFLAGS) $(LIBS) -o $(EXE)
+
+run: $(EXE)
+	@./$(EXE)
 
 clean:
 	rm -f $(EXE)

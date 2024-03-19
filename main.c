@@ -1,92 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include "structures.h"
+#include "characters.h"
 
-// Structure pour caractériser le personnage principal
-typedef struct {
-    float x;
-    float y;
-    int width;
-    int height;
-    float speed;
-} Character;
-
-// Structure pour caractériser les murs
-// Permet en gros au personnage de pas traverser les murs si des murs sont affichés
-// On y met la taille des murs en valeur absolue (pas de négatif pour la droite et en bas)
-typedef struct {
-    float left;
-    float up;
-    float right;
-    float down;
-} Wall;
-
-// test commentaire
-
-void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
-    /*
-    QUAND ON VEUT LA HAUTEUR DU PERSONNAGE IL FAUT FAIRE *1.4
-    Pouquoi ?
-    Parce que je ne sais pas.
-    La hauteur est la bonne (sinon l'affichage du personnage serait déformé, disproportionné)
-    Mais si on ne fait pas de multiplication, approximativement la moitié du perso sort de l'écran
-    *1.4 c'est la valeur parfait pour arriver au bord de l'écran
-    C et la SDL ou plutôt les trucs incompréhensibles 
-    */
-
-    // On commence par calculer la valeur des bordures
-    int border_left = wall->left; // 0 sans mur
-    int border_up = wall-> up; // 0 sans mur
-    int border_right = displayMode.w - character->width - wall->right; // on soustrait la largeur du perso pour pas qu'il sorte de l'écran
-    int border_down = displayMode.h - 1.4 * character->height - wall->down; // on soustrait la hauteur du perso pour pas qu'il sorte de l'écran (avec le fameux 1.4)
-
-    // On teste les déplacements pour pas que ça sorte des bordures qu'on vient de calculer
-    if (character->x + dx < border_left && character->y + dy < border_up)
-    {
-        // Coin en haut à gauche
-        character->x = border_left;
-        character->y = border_up;
-    } else if (character->x + dx > border_right && character->y + dy < border_up)
-    {
-        // Coin en haut à droite
-        character->x = border_right;
-        character->y = border_up;
-    } else if (character->x + dx > border_right && character->y + dy > border_down)
-    {
-        // Coin en bas à droit
-        character->x = border_right;
-        character->y = border_down;
-    } else if (character->x + dx < border_left && character->y + dy > border_down)
-    {
-        // Coin en bas à gauche
-        character->x = border_left;
-        character->y = border_down;
-    } else if (character->x + dx < border_left)
-    {
-        // Mur gauche
-        character->x = border_left;
-        character->y += dy;
-    } else if (character->y + dy < border_up)
-    {
-        // Mur haut
-        character->x += dx;
-        character->y = border_up;
-    } else if (character->x + dx > border_right)
-    {
-        // Mur droite
-        character->x = border_right;
-        character->y += dy;
-    } else if (character->y + dy > border_down)
-    {
-        // Mur bas
-        character->x += dx;
-        character->y = border_down;
-    } else 
-    {
-        // Aucun mur sur le chemin
-        character->x += dx;
-        character->y += dy;
-    }
-}
 
 int main() {
     // init SDL
@@ -120,7 +36,7 @@ int main() {
     }
 
     // charger fond d'écran
-    SDL_Surface *backgroundSurface = IMG_Load("map.png");
+    SDL_Surface *backgroundSurface = IMG_Load("assets/map.png");
     if (!backgroundSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading background: %s", IMG_GetError());
         exit(-1);
@@ -134,7 +50,7 @@ int main() {
     }
 
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("fleches.png");
+    SDL_Surface *characterSurface = IMG_Load("assets/fleches.png");
     if (!characterSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
         exit(-1);
@@ -146,7 +62,7 @@ int main() {
         .y = displayMode.h / 2,
         .width = 200,
         .height = 200, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
-        .speed = 0.5
+        .speed = 5.0
     };
 
     SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
