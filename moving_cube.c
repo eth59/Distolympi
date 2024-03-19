@@ -1,15 +1,89 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+// Structure pour caractériser le personnage principal
 typedef struct {
     float x;
     float y;
-    float size;
-} Character ;
+    int width;
+    int height;
+    float speed;
+} Character;
 
-void moveCharacter(Character *character, float dx, float dy) {
-    character->x += dx;
-    character->y += dy;
+// Structure pour caractériser les murs
+// Permet en gros au personnage de pas traverser les murs si des murs sont affichés
+// On y met la taille des murs en valeur absolue (pas de négatif pour la droite et en bas)
+typedef struct {
+    float left;
+    float up;
+    float right;
+    float down;
+} Wall;
+
+void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
+    /*
+    QUAND ON VEUT LA HAUTEUR DU PERSONNAGE IL FAUT FAIRE *1.4
+    Pouquoi ?
+    Parce que je ne sais pas.
+    La hauteur est la bonne (sinon l'affichage du personnage serait déformé, disproportionné)
+    Mais si on ne fait pas de multiplication, approximativement la moitié du perso sort de l'écran
+    *1.4 c'est la valeur parfait pour arriver au bord de l'écran
+    C et la SDL ou plutôt les trucs incompréhensibles 
+    */
+
+    // On commence par calculer la valeur des bordures
+    int border_left = wall->left; // 0 sans mur
+    int border_up = wall-> up; // 0 sans mur
+    int border_right = displayMode.w - character->width - wall->right; // on soustrait la largeur du perso pour pas qu'il sorte de l'écran
+    int border_down = displayMode.h - 1.4 * character->height - wall->down; // on soustrait la hauteur du perso pour pas qu'il sorte de l'écran (avec le fameux 1.4)
+
+    // On teste les déplacements pour pas que ça sorte des bordures qu'on vient de calculer
+    if (character->x + dx < border_left && character->y + dy < border_up)
+    {
+        // Coin en haut à gauche
+        character->x = border_left;
+        character->y = border_up;
+    } else if (character->x + dx > border_right && character->y + dy < border_up)
+    {
+        // Coin en haut à droite
+        character->x = border_right;
+        character->y = border_up;
+    } else if (character->x + dx > border_right && character->y + dy > border_down)
+    {
+        // Coin en bas à droit
+        character->x = border_right;
+        character->y = border_down;
+    } else if (character->x + dx < border_left && character->y + dy > border_down)
+    {
+        // Coin en bas à droit
+        character->x = border_left;
+        character->y = border_down;
+    } else if (character->x + dx < border_left)
+    {
+        // Mur gauche
+        character->x = border_left;
+        character->y += dy;
+    } else if (character->y + dy < border_up)
+    {
+        // Mur haut
+        character->x += dx;
+        character->y = border_up;
+    } else if (character->x + dx > border_right)
+    {
+        // Mur droite
+        character->x = border_right;
+        character->y += dy;
+    } else if (character->y + dy > border_down)
+    {
+        // Mur bas
+        character->x += dx;
+        character->y = border_down;
+    } else 
+    {
+        // Aucun mur sur le chemin
+        character->x += dx;
+        character->y += dy;
+    }
 }
 
 int main() {
@@ -29,7 +103,7 @@ int main() {
     }
 
     // création de la fenêtre en mode plein écran fenêtre
-    SDL_Window *window = SDL_CreateWindow("SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_MAXIMIZED);
+    SDL_Window *window = SDL_CreateWindow("SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
@@ -64,6 +138,15 @@ int main() {
         exit(-1);
     }
 
+    // initialisation du personnage
+    Character character = {
+        .x = displayMode.w / 2,
+        .y = displayMode.h / 2,
+        .width = 100,
+        .height = (characterSurface->h*100) / characterSurface->w, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
+        .speed = 0.5
+    };
+
     SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
     SDL_FreeSurface(characterSurface); // Libérer la surface après avoir créé la texture
     if (!characterTexture) {
@@ -71,38 +154,104 @@ int main() {
         exit(-1);
     }
 
-    // initialisation du personnage
-    Character character = {.x = displayMode.w / 2, .y = displayMode.h / 2, .size = 150};
+    // Initialisation des murs (juste leurs tailles)
+    Wall wall = {
+        .left = 0,
+        .up = 30,
+        .right = 0,
+        .down = 90
+    };
 
     // boucle principale
     SDL_Event event;
     int running = 1;
 
+    // Declare global flags to track key states
+    int key_up_pressed = 0;
+    int key_down_pressed = 0;
+    int key_left_pressed = 0;
+    int key_right_pressed = 0;
+
     while (running) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    running = 0;
-                    break;
+                    // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
+                    exit(-1);
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
+                        // Pour chaque touche de déplacement on met le booléen
+                        // correspondant à 1 quand la touche est pressée
                         case SDLK_q:
-                            moveCharacter(&character, -10, 0);
+                            key_left_pressed = 1;
                             break;
                         case SDLK_d:
-                            moveCharacter(&character, 10, 0);
+                            key_right_pressed = 1;
                             break;
                         case SDLK_z:
-                            moveCharacter(&character, 0, -10);
+                            key_up_pressed = 1;
                             break;
                         case SDLK_s:
-                            moveCharacter(&character, 0, 10);
+                            key_down_pressed = 1;
                             break;
                     }
                     break;
-                default:
+                case SDL_KEYUP:
+                    switch (event.key.keysym.sym) {
+                        // Pour chaque touche de déplacement on met le booléen
+                        // correspondant à 0 quand la touche est relachée
+                        case SDLK_q:
+                            key_left_pressed = 0;
+                            break;
+                        case SDLK_d:
+                            key_right_pressed = 0;
+                            break;
+                        case SDLK_z:
+                            key_up_pressed = 0;
+                            break;
+                        case SDLK_s:
+                            key_down_pressed = 0;
+                            break;
+                    }
                     break;
+                case SDL_WINDOWEVENT:
+                // Gestion des événements de fenêtre
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    // La fenêtre a été redimensionnée, ajustons la position et la taille du personnage
+                    float characterXRatio = (float)character.x / displayMode.w;
+                    float characterYRatio = (float)character.y / displayMode.h;
+                    float characterWidthRatio = (float)character.width / displayMode.w;
+                    float characterHeightRatio = (float)character.height / displayMode.h;
+                    displayMode.w = event.window.data1; // Nouvelle largeur de la fenêtre
+                    displayMode.h = event.window.data2; // Nouvelle hauteur de la fenêtre
+                    character.x = characterXRatio * displayMode.w;
+                    character.y = characterYRatio * displayMode.h;
+                    character.width = characterWidthRatio * displayMode.w;
+                    character.height = characterHeightRatio * displayMode.h;
+                }
+                break;
             }
+        }
+
+        // Déplacement du personnage
+        // On multiplie par sqrt(2) en diagonale
+        // pour éviter une impression de vitesse plus élévée
+        if (key_left_pressed && key_up_pressed) {
+            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
+        } else if (key_left_pressed && key_down_pressed) {
+            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
+        } else if (key_right_pressed && key_up_pressed) {
+            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, -character.speed*0.7071f);
+        } else if (key_right_pressed && key_down_pressed) {
+            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, character.speed*0.7071f);
+        } else if (key_left_pressed) {
+            moveCharacter(&character, &wall, displayMode, -character.speed, 0);
+        } else if (key_right_pressed) {
+            moveCharacter(&character, &wall, displayMode, character.speed, 0);
+        } else if (key_up_pressed) {
+            moveCharacter(&character, &wall, displayMode, 0, -character.speed);
+        } else if (key_down_pressed) {
+            moveCharacter(&character, &wall, displayMode, 0, character.speed);
         }
 
         // actions mobs & gestion interaction - TO DO
@@ -116,7 +265,7 @@ int main() {
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
         // Dessiner le personnage
-        SDL_Rect characterRect = {(int)character.x, (int)character.y, (int)character.size, (int)character.size};
+        SDL_Rect characterRect = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_RenderCopy(renderer, characterTexture, NULL, &characterRect);
 
         SDL_RenderPresent(renderer);
