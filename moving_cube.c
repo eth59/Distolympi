@@ -57,7 +57,7 @@ void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode
         character->y = border_down;
     } else if (character->x + dx < border_left && character->y + dy > border_down)
     {
-        // Coin en bas à droit
+        // Coin en bas à gauche
         character->x = border_left;
         character->y = border_down;
     } else if (character->x + dx < border_left)
@@ -134,7 +134,7 @@ int main() {
     }
 
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("perso.png");
+    SDL_Surface *characterSurface = IMG_Load("fleches.png");
     if (!characterSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
         exit(-1);
@@ -144,8 +144,8 @@ int main() {
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
-        .width = 100,
-        .height = (characterSurface->h*100) / characterSurface->w, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
+        .width = 200,
+        .height = 200, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
         .speed = 0.5
     };
 
@@ -173,7 +173,7 @@ int main() {
     int key_down_pressed = 0;
     int key_left_pressed = 0;
     int key_right_pressed = 0;
-
+    int direction=0;
     while (running) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -239,20 +239,28 @@ int main() {
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élévée
         if (key_left_pressed && key_up_pressed) {
-            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
+            direction=0;
+           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
         } else if (key_left_pressed && key_down_pressed) {
-            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
+            direction=0;
+           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
         } else if (key_right_pressed && key_up_pressed) {
+            direction=1;
             moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, -character.speed*0.7071f);
         } else if (key_right_pressed && key_down_pressed) {
+            direction=1;
             moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, character.speed*0.7071f);
         } else if (key_left_pressed) {
+            direction=0;
             moveCharacter(&character, &wall, displayMode, -character.speed, 0);
         } else if (key_right_pressed) {
+            direction=1;
             moveCharacter(&character, &wall, displayMode, character.speed, 0);
         } else if (key_up_pressed) {
+            direction=3;
             moveCharacter(&character, &wall, displayMode, 0, -character.speed);
         } else if (key_down_pressed) {
+            direction=2;
             moveCharacter(&character, &wall, displayMode, 0, character.speed);
         }
 
@@ -265,10 +273,22 @@ int main() {
 
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-
-        // Dessiner le personnage
-        SDL_Rect characterRect = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
-        SDL_RenderCopy(renderer, characterTexture, NULL, &characterRect);
+        // modif ici nino
+        SDL_Rect characterRectsrc[4];
+        int pointeur_frame=0;
+        int i;
+        int u;
+        int v;
+        for(i=0;i<4;i++){
+            u=0;
+            v=16*i;
+            characterRectsrc[i].x=u;
+            characterRectsrc[i].y=v;
+            characterRectsrc[i].w=16;
+            characterRectsrc[i].h=16;
+        }
+        SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction], &characterRectdest);
 
         SDL_RenderPresent(renderer);
     }
