@@ -20,6 +20,35 @@ typedef struct {
     float down;
 } Wall;
 
+
+#include <SDL.h>
+
+SDL_Rect* get_frames(int width_frame, int height_frame, int max_line_frame, int max_column_frame) {
+    int column_frame;
+    int line_frame;
+    int pointer_frame = 0;
+    int x_pointer;
+    int y_pointer;
+    SDL_Rect* characterRectsrc = (SDL_Rect*)malloc(sizeof(SDL_Rect) * max_line_frame * max_column_frame);
+    
+    for (line_frame = 0; line_frame < max_line_frame; line_frame++) {
+        for (column_frame = 0; column_frame < max_column_frame; column_frame++) {
+            x_pointer = width_frame * column_frame;
+            y_pointer = height_frame * line_frame;
+            characterRectsrc[pointer_frame].x = x_pointer;
+            characterRectsrc[pointer_frame].y = y_pointer;
+            characterRectsrc[pointer_frame].w = width_frame;
+            characterRectsrc[pointer_frame].h = height_frame;
+            pointer_frame++;
+        }
+    }
+    return characterRectsrc;
+}
+
+
+
+
+
 void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
     /*
     QUAND ON VEUT LA HAUTEUR DU PERSONNAGE IL FAUT FAIRE *1.4
@@ -103,7 +132,7 @@ int main() {
     }
 
     // création de la fenêtre en mode plein écran fenêtre
-    SDL_Window *window = SDL_CreateWindow("SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
@@ -154,6 +183,11 @@ int main() {
         exit(-1);
     }
 
+
+    // On divise la tileset du character 
+
+    SDL_Rect* characterRectsrc=get_frames(16,16,4,3);
+
     // Initialisation des murs (juste leurs tailles)
     Wall wall = {
         .left = 0,
@@ -172,6 +206,7 @@ int main() {
     int key_left_pressed = 0;
     int key_right_pressed = 0;
     int direction=0;
+    int animation_frame=0;
     while (running) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -271,24 +306,14 @@ int main() {
 
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        // modif ici nino
-        SDL_Rect characterRectsrc[4];
-        int pointeur_frame=0;
-        int i;
-        int u;
-        int v;
-        for(i=0;i<4;i++){
-            u=0;
-            v=16*i;
-            characterRectsrc[i].x=u;
-            characterRectsrc[i].y=v;
-            characterRectsrc[i].w=16;
-            characterRectsrc[i].h=16;
-        }
+
+        int key_pressed=key_down_pressed | key_left_pressed | key_right_pressed | key_up_pressed;//On regarde si une touche de direction est appuyé
+        animation_frame=animation_frame%3;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
-        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction], &characterRectdest);
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*3+animation_frame*key_pressed], &characterRectdest);
 
         SDL_RenderPresent(renderer);
+        animation_frame++;
     }
 
     return 0;
