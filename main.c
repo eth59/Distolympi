@@ -5,29 +5,29 @@
 
 
 int main() {
-    // init SDL
+    // Initialisation SDL
     if (SDL_Init(SDL_INIT_EVERYTHING)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in init: %s", SDL_GetError());
         exit(-1);
     }
     atexit(SDL_Quit);
 
-    // init fenetre
-    // obtenir les informations d'affichage
+    // Initialisation de la fenêtre
+    // Obtention des informations d'affichage
     SDL_DisplayMode displayMode;
     if (SDL_GetDesktopDisplayMode(0, &displayMode)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error getting display mode: %s", SDL_GetError());
         exit(-1);
     }
 
-    // création de la fenêtre en mode plein écran fenêtre
+    // Création de la fenêtre en mode plein écran fenêtre
     SDL_Window *window = SDL_CreateWindow("SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
     }
 
-    // init renderer
+    // Initialisation du renderer
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
@@ -35,7 +35,7 @@ int main() {
         exit(-1);
     }
 
-    // charger fond d'écran
+    // Chargement du fond d'écran
     SDL_Surface *backgroundSurface = IMG_Load("assets/map.png");
     if (!backgroundSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading background: %s", IMG_GetError());
@@ -56,7 +56,7 @@ int main() {
         exit(-1);
     }
 
-    // initialisation du personnage
+    // Initialisation du personnage
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
@@ -80,11 +80,35 @@ int main() {
         .down = 90
     };
 
-    // boucle principale
+    // Initialisation d'un 1er objet : un fromage
+    Object cheese = {
+        .x = 50,
+        .y = 50,
+        .height = 100,
+        .width = 100,
+        .ground = 1,
+        .type = 0
+    };
+
+    // Charger la texture du fromage
+    SDL_Surface *cheeseSurface = IMG_Load("assets/cheese.png");
+    if (!cheeseSurface) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading cheese texture: %s", IMG_GetError());
+        exit(-1);
+    }
+
+    SDL_Texture *cheeseTexture = SDL_CreateTextureFromSurface(renderer, cheeseSurface);
+    SDL_FreeSurface(cheeseSurface); // Libérer la surface après avoir créé la texture
+    if (!cheeseTexture) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating cheese texture: %s", SDL_GetError());
+        exit(-1);
+    }
+
+    // Boucle principale
     SDL_Event event;
     int running = 1;
 
-    // Declare global flags to track key states
+    // Déclaration de variables pour suivre l'état des touches
     int key_up_pressed = 0;
     int key_down_pressed = 0;
     int key_left_pressed = 0;
@@ -180,16 +204,24 @@ int main() {
             moveCharacter(&character, &wall, displayMode, 0, character.speed);
         }
 
-        // actions mobs & gestion interaction - TO DO
+        // Actions mobs & gestion interaction
 
-        // changement états du jeu - TO DO
+        // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
+        if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
+            character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
+            cheese.ground = 0; // le fromage est dans l'inventaire maintenant
+            SDL_DestroyTexture(cheeseTexture);
+        }
+
+        // Changement états du jeu - TO DO
 
         // rendu graphique
         SDL_RenderClear(renderer);
 
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        // modif ici nino
+
+        // Animation de la flèche
         SDL_Rect characterRectsrc[4];
         int pointeur_frame=0;
         int i;
@@ -205,6 +237,10 @@ int main() {
         }
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction], &characterRectdest);
+
+        // Rendu du fromage
+        SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
+        SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
 
         SDL_RenderPresent(renderer);
     }
