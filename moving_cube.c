@@ -20,9 +20,6 @@ typedef struct {
     float down;
 } Wall;
 
-
-#include <SDL.h>
-
 SDL_Rect* get_frames(int width_frame, int height_frame, int max_line_frame, int max_column_frame) {
     int column_frame;
     int line_frame;
@@ -50,15 +47,6 @@ SDL_Rect* get_frames(int width_frame, int height_frame, int max_line_frame, int 
 
 
 void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
-    /*
-    QUAND ON VEUT LA HAUTEUR DU PERSONNAGE IL FAUT FAIRE *1.4
-    Pouquoi ?
-    Parce que je ne sais pas.
-    La hauteur est la bonne (sinon l'affichage du personnage serait déformé, disproportionné)
-    Mais si on ne fait pas de multiplication, approximativement la moitié du perso sort de l'écran
-    *1.4 c'est la valeur parfait pour arriver au bord de l'écran
-    C et la SDL ou plutôt les trucs incompréhensibles 
-    */
 
     // On commence par calculer la valeur des bordures
     int border_left = wall->left; // 0 sans mur
@@ -161,7 +149,7 @@ int main() {
     }
 
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("fleches.png");
+    SDL_Surface *characterSurface = IMG_Load("male.png");
     if (!characterSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
         exit(-1);
@@ -172,8 +160,8 @@ int main() {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
         .width = 200,
-        .height = 200, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
-        .speed = 0.5
+        .height = 200,
+        .speed = 4
     };
 
     SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
@@ -185,8 +173,9 @@ int main() {
 
 
     // On divise la tileset du character 
-
-    SDL_Rect* characterRectsrc=get_frames(16,16,4,3);
+    int max_column_frame=8;
+    int max_line_frame=10;
+    SDL_Rect* characterRectsrc=get_frames(32,32,max_line_frame,max_column_frame);
 
     // Initialisation des murs (juste leurs tailles)
     Wall wall = {
@@ -205,8 +194,10 @@ int main() {
     int key_down_pressed = 0;
     int key_left_pressed = 0;
     int key_right_pressed = 0;
+    // flags pour animation
     int direction=0;
-    int animation_frame=0;
+    int animation_frame=0;//quel etape du cycle d'animation
+    int delay_frame=0;//compteur pour ne pas actualiser a chaque rendu
     while (running) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -272,25 +263,25 @@ int main() {
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élévée
         if (key_left_pressed && key_up_pressed) {
-            direction=0;
+            direction=5;
            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
         } else if (key_left_pressed && key_down_pressed) {
-            direction=0;
+            direction=3;
            moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
         } else if (key_right_pressed && key_up_pressed) {
-            direction=1;
+            direction=7;
             moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, -character.speed*0.7071f);
         } else if (key_right_pressed && key_down_pressed) {
-            direction=1;
+            direction=9;
             moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, character.speed*0.7071f);
         } else if (key_left_pressed) {
-            direction=0;
+            direction=4;
             moveCharacter(&character, &wall, displayMode, -character.speed, 0);
         } else if (key_right_pressed) {
-            direction=1;
+            direction=8;
             moveCharacter(&character, &wall, displayMode, character.speed, 0);
         } else if (key_up_pressed) {
-            direction=3;
+            direction=6;
             moveCharacter(&character, &wall, displayMode, 0, -character.speed);
         } else if (key_down_pressed) {
             direction=2;
@@ -308,12 +299,16 @@ int main() {
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
         int key_pressed=key_down_pressed | key_left_pressed | key_right_pressed | key_up_pressed;//On regarde si une touche de direction est appuyé
-        animation_frame=animation_frame%3;// cycle d'animation
+        animation_frame=animation_frame%max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
-        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*3+animation_frame*key_pressed], &characterRectdest);
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*max_column_frame+animation_frame*key_pressed], &characterRectdest);
 
         SDL_RenderPresent(renderer);
-        animation_frame++;
+        if(delay_frame>5/character.speed){
+            animation_frame++;
+            delay_frame=0;
+        }
+        delay_frame++;
     }
 
     return 0;
