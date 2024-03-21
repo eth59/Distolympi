@@ -44,11 +44,12 @@ int main() {
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
-        .width = displayMode.h/7 ,
-        .height =displayMode.h/7,
-        .speed = displayMode.w/500
+        .width = displayMode.w/16 ,
+        .height =displayMode.h/9,
+        .speed = 2
     };
-
+    
+    
 
     // On divise la tileset du character 
     int max_column_frame=8;
@@ -137,39 +138,7 @@ int main() {
             }
         }
 
-        // Déplacement du personnage
-        // On multiplie par sqrt(2) en diagonale
-        // pour éviter une impression de vitesse plus élévée
-        if (key_left_pressed && key_up_pressed) {
-            direction=5;
-           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
-        } else if (key_left_pressed && key_down_pressed) {
-            direction=3;
-           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
-        } else if (key_right_pressed && key_up_pressed) {
-            direction=7;
-            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, -character.speed*0.7071f);
-        } else if (key_right_pressed && key_down_pressed) {
-            direction=9;
-            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, character.speed*0.7071f);
-        } else if (key_left_pressed) {
-            direction=4;
-            moveCharacter(&character, &wall, displayMode, -character.speed, 0);
-        } else if (key_right_pressed) {
-            direction=8;
-            moveCharacter(&character, &wall, displayMode, character.speed, 0);
-        } else if (key_up_pressed) {
-            direction=6;
-            moveCharacter(&character, &wall, displayMode, 0, -character.speed);
-        } else if (key_down_pressed) {
-            direction=2;
-            moveCharacter(&character, &wall, displayMode, 0, character.speed);
-        }
-
-        // actions mobs & gestion interaction - TO DO
-
-        // changement états du jeu - TO DO
-
+        direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,character,wall,displayMode);
         // rendu graphique
         SDL_RenderClear(renderer);
 
