@@ -17,3 +17,13 @@ typedef struct {
     float right;
     float down;
 } Wall;
+
+// Structure pour caractériser les objets
+typedef struct {
+    float x;
+    float y;
+    int width;
+    int height;
+    int type; // 0 : nourriture, 1 : armes, 2 : équipements 
+    int ground; // 0 : inventaire, 1 : sol
+} Object;
