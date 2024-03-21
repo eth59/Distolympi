@@ -4,7 +4,13 @@
 #include "characters.h"
 #include "animations.h"
 
+#define SCREEN_WIDTH 1920
+#define SCREEN_HEIGHT 1080
+#define FPS 60
+
 int main() {
+    Uint32 startTime, endTime, deltaTime;
+
     // Initialisation SDL
     if (SDL_Init(SDL_INIT_EVERYTHING)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in init: %s", SDL_GetError());
@@ -21,7 +27,7 @@ int main() {
     }
 
     // création de la fenêtre en mode plein écran fenêtre
-    SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
@@ -102,6 +108,8 @@ int main() {
     int animation_frame=0;//quel etape du cycle d'animation
     int delay_frame=0;//compteur pour ne pas actualiser a chaque rendu
     while (running) {
+        startTime = SDL_GetTicks();
+
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
@@ -198,6 +206,13 @@ int main() {
             delay_frame=0;
         }
         delay_frame++;
+
+        // Cap the frame rate
+        endTime = SDL_GetTicks();
+        deltaTime = endTime - startTime;
+        if (deltaTime < 1000 / FPS) {
+            SDL_Delay((1000 / FPS) - deltaTime);
+        }
     }
 
     return 0;
