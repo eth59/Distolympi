@@ -139,7 +139,7 @@ int main() {
         }
 
         if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
-            direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,wall,displayMode);
+            direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,&wall,displayMode);
         }
 
         // rendu graphique
