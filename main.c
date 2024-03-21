@@ -81,18 +81,7 @@ int main() {
     };
 
     // Charger la texture du fromage
-    SDL_Surface *cheeseSurface = IMG_Load("assets/cheese.png");
-    if (!cheeseSurface) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading cheese texture: %s", IMG_GetError());
-        exit(-1);
-    }
-
-    SDL_Texture *cheeseTexture = SDL_CreateTextureFromSurface(renderer, cheeseSurface);
-    SDL_FreeSurface(cheeseSurface); // Libérer la surface après avoir créé la texture
-    if (!cheeseTexture) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating cheese texture: %s", SDL_GetError());
-        exit(-1);
-    }
+    SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
     // Boucle principale
     SDL_Event event;
