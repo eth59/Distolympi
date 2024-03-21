@@ -149,7 +149,7 @@ int main() {
     }
 
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("male.png");
+    SDL_Surface *characterSurface = IMG_Load("loli.png");
     if (!characterSurface) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
         exit(-1);
@@ -159,9 +159,9 @@ int main() {
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
-        .width = 200,
-        .height = 200,
-        .speed = 4
+        .width = displayMode.h/7 ,
+        .height =displayMode.h/7,
+        .speed = displayMode.w/500
     };
 
     SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
@@ -181,8 +181,8 @@ int main() {
     Wall wall = {
         .left = 0,
         .up = 30,
-        .right = 0,
-        .down = 90
+        .right = -50,
+        .down = 110
     };
 
     // boucle principale
@@ -304,7 +304,7 @@ int main() {
         SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*max_column_frame+animation_frame*key_pressed], &characterRectdest);
 
         SDL_RenderPresent(renderer);
-        if(delay_frame>5/character.speed){
+        if(delay_frame>20/character.speed){
             animation_frame++;
             delay_frame=0;
         }
