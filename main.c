@@ -103,7 +103,7 @@ int main() {
             switch (event.type) {
                 case SDL_QUIT:
                     // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
-                    exit(-1);
+                    running=0;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
                         // Pour chaque touche de déplacement on met le booléen
@@ -203,6 +203,11 @@ int main() {
             SDL_Delay((1000 / FPS) - deltaTime);
         }
     }
-
+    // Libérer la mémoire et quitter SDL
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+    printf("stoped the game\n");
+    exit(-1);
     return 0;
 }
