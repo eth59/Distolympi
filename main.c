@@ -1,107 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-
-// Structure pour caractériser le personnage principal
-typedef struct {
-    float x;
-    float y;
-    int width;
-    int height;
-    float speed;
-} Character;
-
-// Structure pour caractériser les murs
-// Permet en gros au personnage de pas traverser les murs si des murs sont affichés
-// On y met la taille des murs en valeur absolue (pas de négatif pour la droite et en bas)
-typedef struct {
-    float left;
-    float up;
-    float right;
-    float down;
-} Wall;
-
-SDL_Rect* get_frames(int width_frame, int height_frame, int max_line_frame, int max_column_frame) {
-    int column_frame;
-    int line_frame;
-    int pointer_frame = 0;
-    int x_pointer;
-    int y_pointer;
-    SDL_Rect* characterRectsrc = (SDL_Rect*)malloc(sizeof(SDL_Rect) * max_line_frame * max_column_frame);
-    
-    for (line_frame = 0; line_frame < max_line_frame; line_frame++) {
-        for (column_frame = 0; column_frame < max_column_frame; column_frame++) {
-            x_pointer = width_frame * column_frame;
-            y_pointer = height_frame * line_frame;
-            characterRectsrc[pointer_frame].x = x_pointer;
-            characterRectsrc[pointer_frame].y = y_pointer;
-            characterRectsrc[pointer_frame].w = width_frame;
-            characterRectsrc[pointer_frame].h = height_frame;
-            pointer_frame++;
-        }
-    }
-    return characterRectsrc;
-}
-
-
-
-
-
-void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode, float dx, float dy) {
-
-    // On commence par calculer la valeur des bordures
-    int border_left = wall->left; // 0 sans mur
-    int border_up = wall-> up; // 0 sans mur
-    int border_right = displayMode.w - character->width - wall->right; // on soustrait la largeur du perso pour pas qu'il sorte de l'écran
-    int border_down = displayMode.h - 1.4 * character->height - wall->down; // on soustrait la hauteur du perso pour pas qu'il sorte de l'écran (avec le fameux 1.4)
-
-    // On teste les déplacements pour pas que ça sorte des bordures qu'on vient de calculer
-    if (character->x + dx < border_left && character->y + dy < border_up)
-    {
-        // Coin en haut à gauche
-        character->x = border_left;
-        character->y = border_up;
-    } else if (character->x + dx > border_right && character->y + dy < border_up)
-    {
-        // Coin en haut à droite
-        character->x = border_right;
-        character->y = border_up;
-    } else if (character->x + dx > border_right && character->y + dy > border_down)
-    {
-        // Coin en bas à droit
-        character->x = border_right;
-        character->y = border_down;
-    } else if (character->x + dx < border_left && character->y + dy > border_down)
-    {
-        // Coin en bas à gauche
-        character->x = border_left;
-        character->y = border_down;
-    } else if (character->x + dx < border_left)
-    {
-        // Mur gauche
-        character->x = border_left;
-        character->y += dy;
-    } else if (character->y + dy < border_up)
-    {
-        // Mur haut
-        character->x += dx;
-        character->y = border_up;
-    } else if (character->x + dx > border_right)
-    {
-        // Mur droite
-        character->x = border_right;
-        character->y += dy;
-    } else if (character->y + dy > border_down)
-    {
-        // Mur bas
-        character->x += dx;
-        character->y = border_down;
-    } else 
-    {
-        // Aucun mur sur le chemin
-        character->x += dx;
-        character->y += dy;
-    }
-}
+#include "structures.h"
+#include "characters.h"
+#include "animations.h"
 
 int main() {
     // init SDL
@@ -135,25 +36,9 @@ int main() {
     }
 
     // charger fond d'écran
-    SDL_Surface *backgroundSurface = IMG_Load("map.png");
-    if (!backgroundSurface) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading background: %s", IMG_GetError());
-        exit(-1);
-    }
-
-    SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
-    SDL_FreeSurface(backgroundSurface);
-    if (!renderer) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating background texture: %s", SDL_GetError());
-        exit(-1);
-    }
-
+    SDL_Texture *backgroundTexture = get_texture("assets/map.png",renderer);
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("loli.png");
-    if (!characterSurface) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
-        exit(-1);
-    }
+    SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
     // initialisation du personnage
     Character character = {
@@ -163,13 +48,6 @@ int main() {
         .height =displayMode.h/7,
         .speed = displayMode.w/500
     };
-
-    SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
-    SDL_FreeSurface(characterSurface); // Libérer la surface après avoir créé la texture
-    if (!characterTexture) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating character texture: %s", SDL_GetError());
-        exit(-1);
-    }
 
 
     // On divise la tileset du character 
