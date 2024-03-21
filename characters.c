@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "structures.h"
 #include "characters.h"
 
@@ -67,4 +68,37 @@ void moveCharacter(Character *character, Wall *wall, SDL_DisplayMode displayMode
         character->x += dx;
         character->y += dy;
     }
+}
+
+int get_direction_and_move(int key_up_pressed ,int key_down_pressed,int key_left_pressed,int key_right_pressed,Character *character,Wall wall, SDL_DisplayMode displayMode){
+    int direction=0;
+    // Déplacement du personnage
+    // On multiplie par sqrt(2) en diagonale
+    // pour éviter une impression de vitesse plus élévée
+    if (key_left_pressed && key_up_pressed) {
+        direction=5;
+        moveCharacter(character, wall, displayMode, -character->speed*0.7071f, -character->speed*0.7071f);
+    } else if (key_left_pressed && key_down_pressed) {
+        direction=3;
+        moveCharacter(character, wall, displayMode, -character->speed*0.7071f, character->speed*0.7071f);
+    } else if (key_right_pressed && key_up_pressed) {
+        direction=7;
+        moveCharacter(character, wall, displayMode, character->speed*0.7071f, -character->speed*0.7071f);
+    } else if (key_right_pressed && key_down_pressed) {
+        direction=9;
+        moveCharacter(character, wall, displayMode, character->speed*0.7071f, character->speed*0.7071f);
+    } else if (key_left_pressed) {
+        direction=4;
+        moveCharacter(character, wall, displayMode, -character->speed, 0);
+    } else if (key_right_pressed) {
+        direction=8;
+        moveCharacter(character, wall, displayMode, character->speed, 0);
+    } else if (key_up_pressed) {
+        direction=6;
+        moveCharacter(character, wall, displayMode, 0, -character->speed);
+    } else if (key_down_pressed) {
+        direction=2;
+        moveCharacter(character, wall, displayMode, 0, character->speed);
+    }
+    return direction;
 }

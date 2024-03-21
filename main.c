@@ -2,7 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include "structures.h"
 #include "characters.h"
-
+#include "animations.h"
 
 int main() {
     // init SDL
@@ -21,7 +21,7 @@ int main() {
     }
 
     // création de la fenêtre en mode plein écran fenêtre
-    SDL_Window *window = SDL_CreateWindow("SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, displayMode.w, displayMode.h, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
@@ -36,48 +36,32 @@ int main() {
     }
 
     // charger fond d'écran
-    SDL_Surface *backgroundSurface = IMG_Load("assets/map.png");
-    if (!backgroundSurface) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading background: %s", IMG_GetError());
-        exit(-1);
-    }
-
-    SDL_Texture *backgroundTexture = SDL_CreateTextureFromSurface(renderer, backgroundSurface);
-    SDL_FreeSurface(backgroundSurface);
-    if (!renderer) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating background texture: %s", SDL_GetError());
-        exit(-1);
-    }
-
+    SDL_Texture *backgroundTexture = get_texture("assets/map.png",renderer);
     // Charger la texture du personnage
-    SDL_Surface *characterSurface = IMG_Load("assets/fleches.png");
-    if (!characterSurface) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading character texture: %s", IMG_GetError());
-        exit(-1);
-    }
+    SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
     // initialisation du personnage
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
-        .width = 200,
-        .height = 200, // le nombre ici est le même que celui juste au dessus (c'est un produit en croix)
-        .speed = 5.0
+        .width = displayMode.w/16 ,
+        .height =displayMode.h/9,
+        .speed = 2
     };
+    
+    
 
-    SDL_Texture *characterTexture = SDL_CreateTextureFromSurface(renderer, characterSurface);
-    SDL_FreeSurface(characterSurface); // Libérer la surface après avoir créé la texture
-    if (!characterTexture) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating character texture: %s", SDL_GetError());
-        exit(-1);
-    }
+    // On divise la tileset du character 
+    int max_column_frame=8;
+    int max_line_frame=10;
+    SDL_Rect* characterRectsrc=get_frames(32,32,max_line_frame,max_column_frame);
 
     // Initialisation des murs (juste leurs tailles)
     Wall wall = {
         .left = 0,
         .up = 30,
-        .right = 0,
-        .down = 90
+        .right = -50,
+        .down = 110
     };
 
     // boucle principale
@@ -89,7 +73,10 @@ int main() {
     int key_down_pressed = 0;
     int key_left_pressed = 0;
     int key_right_pressed = 0;
+    // flags pour animation
     int direction=0;
+    int animation_frame=0;//quel etape du cycle d'animation
+    int delay_frame=0;//compteur pour ne pas actualiser a chaque rendu
     while (running) {
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -151,62 +138,27 @@ int main() {
             }
         }
 
-        // Déplacement du personnage
-        // On multiplie par sqrt(2) en diagonale
-        // pour éviter une impression de vitesse plus élévée
-        if (key_left_pressed && key_up_pressed) {
-            direction=0;
-           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, -character.speed*0.7071f);
-        } else if (key_left_pressed && key_down_pressed) {
-            direction=0;
-           moveCharacter(&character, &wall, displayMode, -character.speed*0.7071f, character.speed*0.7071f);
-        } else if (key_right_pressed && key_up_pressed) {
-            direction=1;
-            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, -character.speed*0.7071f);
-        } else if (key_right_pressed && key_down_pressed) {
-            direction=1;
-            moveCharacter(&character, &wall, displayMode, character.speed*0.7071f, character.speed*0.7071f);
-        } else if (key_left_pressed) {
-            direction=0;
-            moveCharacter(&character, &wall, displayMode, -character.speed, 0);
-        } else if (key_right_pressed) {
-            direction=1;
-            moveCharacter(&character, &wall, displayMode, character.speed, 0);
-        } else if (key_up_pressed) {
-            direction=3;
-            moveCharacter(&character, &wall, displayMode, 0, -character.speed);
-        } else if (key_down_pressed) {
-            direction=2;
-            moveCharacter(&character, &wall, displayMode, 0, character.speed);
+        if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
+            direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,wall,displayMode);
         }
-
-        // actions mobs & gestion interaction - TO DO
-
-        // changement états du jeu - TO DO
 
         // rendu graphique
         SDL_RenderClear(renderer);
 
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
-        // modif ici nino
-        SDL_Rect characterRectsrc[4];
-        int pointeur_frame=0;
-        int i;
-        int u;
-        int v;
-        for(i=0;i<4;i++){
-            u=0;
-            v=16*i;
-            characterRectsrc[i].x=u;
-            characterRectsrc[i].y=v;
-            characterRectsrc[i].w=16;
-            characterRectsrc[i].h=16;
-        }
+
+        int key_pressed=key_down_pressed | key_left_pressed | key_right_pressed | key_up_pressed;//On regarde si une touche de direction est appuyé
+        animation_frame=animation_frame%max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
-        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction], &characterRectdest);
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*max_column_frame+animation_frame*key_pressed], &characterRectdest);
 
         SDL_RenderPresent(renderer);
+        if(delay_frame>20/character.speed){
+            animation_frame++;
+            delay_frame=0;
+        }
+        delay_frame++;
     }
 
     return 0;

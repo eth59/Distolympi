@@ -7,7 +7,6 @@ typedef struct {
     float speed;
 } Character;
 
-
 // Structure pour caractériser les murs
 // Permet en gros au personnage de pas traverser les murs si des murs sont affichés
 // On y met la taille des murs en valeur absolue (pas de négatif pour la droite et en bas)
