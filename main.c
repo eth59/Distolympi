@@ -5,15 +5,15 @@
 #include "animations.h"
 
 int main() {
-    // init SDL
+    // Initialisation SDL
     if (SDL_Init(SDL_INIT_EVERYTHING)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in init: %s", SDL_GetError());
         exit(-1);
     }
     atexit(SDL_Quit);
 
-    // init fenetre
-    // obtenir les informations d'affichage
+    // Initialisation de la fenêtre
+    // Obtention des informations d'affichage
     SDL_DisplayMode displayMode;
     if (SDL_GetDesktopDisplayMode(0, &displayMode)) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error getting display mode: %s", SDL_GetError());
@@ -27,7 +27,7 @@ int main() {
         exit(-1);
     }
 
-    // init renderer
+    // Initialisation du renderer
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer) {
@@ -40,7 +40,7 @@ int main() {
     // Charger la texture du personnage
     SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
-    // initialisation du personnage
+    // Initialisation du personnage
     Character character = {
         .x = displayMode.w / 2,
         .y = displayMode.h / 2,
@@ -64,11 +64,35 @@ int main() {
         .down = 110
     };
 
-    // boucle principale
+    // Initialisation d'un 1er objet : un fromage
+    Object cheese = {
+        .x = 50,
+        .y = 50,
+        .height = 100,
+        .width = 100,
+        .ground = 1,
+        .type = 0
+    };
+
+    // Charger la texture du fromage
+    SDL_Surface *cheeseSurface = IMG_Load("assets/cheese.png");
+    if (!cheeseSurface) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading cheese texture: %s", IMG_GetError());
+        exit(-1);
+    }
+
+    SDL_Texture *cheeseTexture = SDL_CreateTextureFromSurface(renderer, cheeseSurface);
+    SDL_FreeSurface(cheeseSurface); // Libérer la surface après avoir créé la texture
+    if (!cheeseTexture) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error creating cheese texture: %s", SDL_GetError());
+        exit(-1);
+    }
+
+    // Boucle principale
     SDL_Event event;
     int running = 1;
 
-    // Declare global flags to track key states
+    // Déclaration de variables pour suivre l'état des touches
     int key_up_pressed = 0;
     int key_down_pressed = 0;
     int key_left_pressed = 0;
@@ -142,6 +166,17 @@ int main() {
             direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,&wall,displayMode);
         }
 
+        // Actions mobs & gestion interaction
+
+        // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
+        if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
+            character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
+            cheese.ground = 0; // le fromage est dans l'inventaire maintenant
+            SDL_DestroyTexture(cheeseTexture);
+        }
+
+        // Changement états du jeu - TO DO
+
         // rendu graphique
         SDL_RenderClear(renderer);
 
@@ -152,6 +187,10 @@ int main() {
         animation_frame=animation_frame%max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*max_column_frame+animation_frame*key_pressed], &characterRectdest);
+
+        // Rendu du fromage
+        SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
+        SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
 
         SDL_RenderPresent(renderer);
         if(delay_frame>20/character.speed){
