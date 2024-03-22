@@ -140,22 +140,6 @@ int main() {
                             break;
                     }
                     break;
-                case SDL_WINDOWEVENT:
-                    // Gestion des événements de fenêtre
-                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        // La fenêtre a été redimensionnée, ajustons la position et la taille du personnage
-                        float characterXRatio = (float)character.x / displayMode.w;
-                        float characterYRatio = (float)character.y / displayMode.h;
-                        float characterWidthRatio = (float)character.width / displayMode.w;
-                        float characterHeightRatio = (float)character.height / displayMode.h;
-                        displayMode.w = event.window.data1; // Nouvelle largeur de la fenêtre
-                        displayMode.h = event.window.data2; // Nouvelle hauteur de la fenêtre
-                        character.x = characterXRatio * displayMode.w;
-                        character.y = characterYRatio * displayMode.h;
-                        character.width = characterWidthRatio * displayMode.w;
-                        character.height = characterHeightRatio * displayMode.h;
-                    }
-                    break;
             }
         }
 
