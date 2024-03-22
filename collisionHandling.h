@@ -1,0 +1,1 @@
+char *openCollisionFile(char *fileName);
