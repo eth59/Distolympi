@@ -3,6 +3,7 @@
 #include "structures.h"
 #include "characters.h"
 #include "animations.h"
+#include "selectRandomMap.h"
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
@@ -41,8 +42,16 @@ int main() {
         exit(-1);
     }
 
+    // selection aléatoire du fond d'écran
+    int index = randomMapIndex();
+    char *map = getMapFromIndex(index);
+    
     // charger fond d'écran
-    SDL_Texture *backgroundTexture = get_texture("assets/map.png",renderer);
+    SDL_Texture *backgroundTexture = get_texture(map, renderer);
+
+    // liberer la mémoire de map
+    free(map);
+
     // Charger la texture du personnage
     SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
