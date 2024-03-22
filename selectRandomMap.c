@@ -25,8 +25,7 @@ char *getMapFromIndex(int index) {
 
     // Allouer de la mémoire pour stocker la chaîne résultante
     
-        
-        char *map = malloc(18 * sizeof(char)); // "map" + chiffre + ".png" + terminateur nul
+    char *map = malloc(18 * sizeof(char)); // "map" + chiffre + ".png" + terminateur nul
 
     //ajoute le "map" a la chaine de caractère
     if (index < 10) {
@@ -41,7 +40,8 @@ char *getMapFromIndex(int index) {
     return map;
 }
 
-char *getColliderTable(int index) {
+char *getColliderFile(int index) {
+    
     //initialise la chaine qui contient l'extension
     char ext[] = ".txt";
     //intialise la variable qui contient l'index en chaine de caractère
@@ -50,17 +50,17 @@ char *getColliderTable(int index) {
     sprintf(charIndex, "%d", index);
 
     // Allouer de la mémoire pour stocker la chaîne résultante
-    char *colliderTable = malloc(18 * sizeof(char)); // "map" + chiffre + ".txt" + terminateur nul
+    char *colliderFile = malloc(18 * sizeof(char)); // "map" + chiffre + ".txt" + terminateur nul
 
     //ajoute le "map" a la chaine de caractère
     if (index < 10) {
-        strcpy(colliderTable, "assets/map0");
+        strcpy(colliderFile, "assets/map0");
     } else {
-        strcpy(colliderTable, "assets/map");
+        strcpy(colliderFile, "assets/map");
     }
     //concatène toutes les chaines
-    strcat(colliderTable, charIndex);
-    strcat(colliderTable, ext);
+    strcat(colliderFile, charIndex);
+    strcat(colliderFile, ext);
 
-    return colliderTable;    
+    return colliderFile;    
 }
