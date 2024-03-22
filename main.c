@@ -49,7 +49,7 @@ int main() {
     // charger fond d'écran
     SDL_Texture *backgroundTexture = get_texture(map, renderer);
 
-    // liberer la mémoire de map
+    // liberer la mémoire allouée a map
     free(map);
 
     // Charger la texture du personnage
