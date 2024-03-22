@@ -50,10 +50,14 @@ char *getColliderTable(int index) {
     sprintf(charIndex, "%d", index);
 
     // Allouer de la mémoire pour stocker la chaîne résultante
-    char *colliderTable = malloc(17 * sizeof(char)); // "map" + chiffre + ".txt" + terminateur nul
+    char *colliderTable = malloc(18 * sizeof(char)); // "map" + chiffre + ".txt" + terminateur nul
 
     //ajoute le "map" a la chaine de caractère
-    strcpy(colliderTable, "assets/map");
+    if (index < 10) {
+        strcpy(colliderTable, "assets/map0");
+    } else {
+        strcpy(colliderTable, "assets/map");
+    }
     //concatène toutes les chaines
     strcat(colliderTable, charIndex);
     strcat(colliderTable, ext);
