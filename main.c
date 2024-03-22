@@ -190,6 +190,9 @@ int main() {
     // Libérer la mémoire et quitter SDL
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyTexture(characterTexture);
+    SDL_DestroyTexture(cheeseTexture);
     SDL_Quit();
     printf("stoped the game\n");
     exit(-1);
