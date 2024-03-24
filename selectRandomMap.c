@@ -40,7 +40,7 @@ char *getMapFromIndex(int index) {
     return map;
 }
 
-char *getColliderFile(int index) {
+char *getColliderTable(int index) {
     
     //initialise la chaine qui contient l'extension
     char ext[] = ".txt";
