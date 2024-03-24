@@ -57,7 +57,7 @@ int checkCollision(char *collisionTable, float x, float y) {
 
     // on calcule l'indice de la tile correspondante aux coordonnées
     int tileIndex = tileXIndex + 16*tileYIndex;
-    printf("%d", tileIndex);
+
     // on vérifie si il y a collision
     if (collisionTable[tileIndex] == '0') {
         return 0;
