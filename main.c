@@ -3,6 +3,7 @@
 #include "structures.h"
 #include "characters.h"
 #include "animations.h"
+#include "enemies.h"
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
@@ -26,7 +27,7 @@ int main() {
         exit(-1);
     }
 
-    // création de la fenêtre en mode plein écran fenêtre
+    // création de la fenêtre
     SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (!window) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
@@ -83,6 +84,12 @@ int main() {
     // Charger la texture du fromage
     SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
+    // Initialisation du zombie
+    Enemy *zombie;
+    SDL_Texture *zombieTexture;
+    SDL_Rect *zombieRectSrc;
+    init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
+
     // Boucle principale
     SDL_Event event;
     int running = 1;
@@ -104,6 +111,7 @@ int main() {
                 case SDL_QUIT:
                     // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
                     running=0;
+                    break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
                         // Pour chaque touche de déplacement on met le booléen
@@ -140,22 +148,6 @@ int main() {
                             break;
                     }
                     break;
-                case SDL_WINDOWEVENT:
-                    // Gestion des événements de fenêtre
-                    if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                        // La fenêtre a été redimensionnée, ajustons la position et la taille du personnage
-                        float characterXRatio = (float)character.x / displayMode.w;
-                        float characterYRatio = (float)character.y / displayMode.h;
-                        float characterWidthRatio = (float)character.width / displayMode.w;
-                        float characterHeightRatio = (float)character.height / displayMode.h;
-                        displayMode.w = event.window.data1; // Nouvelle largeur de la fenêtre
-                        displayMode.h = event.window.data2; // Nouvelle hauteur de la fenêtre
-                        character.x = characterXRatio * displayMode.w;
-                        character.y = characterYRatio * displayMode.h;
-                        character.width = characterWidthRatio * displayMode.w;
-                        character.height = characterHeightRatio * displayMode.h;
-                    }
-                    break;
             }
         }
 
@@ -164,6 +156,7 @@ int main() {
         }
 
         // Actions mobs & gestion interaction
+        move_zombie(&zombie, &character);
 
         // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
         if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
@@ -177,6 +170,8 @@ int main() {
         // rendu graphique
         SDL_RenderClear(renderer);
 
+    int max_column_frame = 8;
+    int max_line_frame = 10;
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
@@ -188,6 +183,9 @@ int main() {
         // Rendu du fromage
         SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
         SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+
+        // Rendu du zombie
+        render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
 
         SDL_RenderPresent(renderer);
         if(delay_frame>20/character.speed){
@@ -203,9 +201,15 @@ int main() {
             SDL_Delay((1000 / FPS) - deltaTime);
         }
     }
+
     // Libérer la mémoire et quitter SDL
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    SDL_DestroyTexture(backgroundTexture);
+    SDL_DestroyTexture(characterTexture);
+    SDL_DestroyTexture(cheeseTexture);
+    SDL_DestroyTexture(zombieTexture);
+    free(zombie);
     SDL_Quit();
     printf("stoped the game\n");
     exit(-1);
