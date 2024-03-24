@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = $(shell sdl2-config --cflags)
-LIBS = $(shell sdl2-config --libs) -lSDL2_image
+LIBS = $(shell sdl2-config --libs) -lSDL2_image -lm
 
 SRC = $(wildcard *.c)
 
