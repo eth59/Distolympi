@@ -4,6 +4,7 @@
 #include "characters.h"
 #include "animations.h"
 #include "selectRandomMap.h"
+#include "collisionHandling.h"
 
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
@@ -34,6 +35,7 @@ int main() {
         exit(-1);
     }
 
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
     // Initialisation du renderer
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -46,22 +48,31 @@ int main() {
     int index = randomMapIndex();
     char *map = getMapFromIndex(index);
     
+    // on récupère également la collisionTable
+    char *collisionTableFileName = getColliderTable(index);
+    char *collisionTable = openCollisionFile(collisionTableFileName);
+
+
     // charger fond d'écran
     SDL_Texture *backgroundTexture = get_texture(map, renderer);
 
-    // liberer la mémoire allouée a map
+    // liberer la mémoire allouée a map et au filename de collisiontable
     free(map);
-
+    free(collisionTableFileName);
     // Charger la texture du personnage
     SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
     // Initialisation du personnage
     Character character = {
-        .x = displayMode.w / 2,
-        .y = displayMode.h / 2,
-        .width = displayMode.w/16 ,
-        .height =displayMode.h/9,
-        .speed = 2
+        .x = SCREEN_WIDTH / 2,
+        .y = SCREEN_HEIGHT / 2,
+        .width = SCREEN_WIDTH/16 ,
+        .height =SCREEN_HEIGHT/9,
+        .speed = 2,
+        .hitBoxHeight = SCREEN_HEIGHT/36,
+        .hitBoxWidth = SCREEN_WIDTH/32,
+        .xHitBox = SCREEN_WIDTH/2 + SCREEN_WIDTH/64,
+        .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36
     };
     
     
@@ -70,14 +81,6 @@ int main() {
     int max_column_frame=8;
     int max_line_frame=10;
     SDL_Rect* characterRectsrc=get_frames(32,32,max_line_frame,max_column_frame);
-
-    // Initialisation des murs (juste leurs tailles)
-    Wall wall = {
-        .left = 0,
-        .up = 30,
-        .right = -50,
-        .down = 110
-    };
 
     // Initialisation d'un 1er objet : un fromage
     Object cheese = {
@@ -169,11 +172,10 @@ int main() {
         }
 
         if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
-            direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,&wall,displayMode);
+            direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
         }
 
         // Actions mobs & gestion interaction
-
         // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
         if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
             character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
