@@ -63,7 +63,7 @@ int get_direction_and_move(int key_up_pressed ,int key_down_pressed,int key_left
     int direction=0;
     // Déplacement du personnage
     // On multiplie par sqrt(2) en diagonale
-    // pour éviter une impression de vitesse plus élévée
+    // pour éviter une impression de vitesse plus élevée
     if (key_left_pressed && key_up_pressed) {
         direction=5;
         moveCharacter(character, displayMode, -character->speed*0.7071f, -character->speed*0.7071f, collisionTable);

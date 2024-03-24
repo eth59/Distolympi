@@ -20,4 +20,3 @@ typedef struct {
     int type; // 0 : nourriture, 1 : armes, 2 : équipements 
     int ground; // 0 : inventaire, 1 : sol
 } Object;
-
