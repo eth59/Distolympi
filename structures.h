@@ -10,6 +10,8 @@ typedef struct {
     float hitBoxWidth;
     float hitBoxHeight;
     float attack_speed;
+    int attack_damage;
+    int health;
 } Character;
 
 // Structure pour caractériser les objets

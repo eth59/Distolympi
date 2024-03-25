@@ -81,7 +81,9 @@ int main() {
         .hitBoxWidth = SCREEN_WIDTH/32,
         .xHitBox = SCREEN_WIDTH/2 + SCREEN_WIDTH/64,
         .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36,
-        .attack_speed = 0.5
+        .attack_speed = 0.5,
+        .health = 100,
+        .attack_damage = 10,
     };
     // On divise la tileset du character 
     int character_max_column_frame=8;
@@ -117,16 +119,19 @@ int main() {
     int key_down_pressed = 0;
     int key_left_pressed = 0;
     int key_right_pressed = 0;
+    int key_space_pressed=0;
+    //attacks variables
     int attack_time;
     int attacks_animation_frame = 0;
     int attacks_delay_frame = 0;
-    int key_space_pressed=0;
     int attack_dispo = 1;
     int attack_flag = 0;
     // flags pour animation
     int direction = 0;
     int character_animation_frame = 0;//quel etape du cycle d'animation
     int character_delay_frame = 0;//compteur pour ne pas actualiser a chaque rendu
+    //
+    int last_zombie_hit = -1000 ;
     while (running) {
         startTime = SDL_GetTicks();
 
@@ -203,6 +208,10 @@ int main() {
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
+         // Rendu du zombie
+        render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
+        SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
+
         //Rendu attacks 
         if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
             attack_dispo = 1;
@@ -222,8 +231,15 @@ int main() {
             if(attacks_animation_frame>4){
                 attack_dispo = 0;
                 attack_flag = 0;
-            }
-        }
+                if (SDL_HasIntersection(&zombieRectDest, &zombieRectDest)) {
+                    // Collision détectée
+                        zombie->health = zombie->health - character.attack_damage;
+                        printf("HIT! Zombie's life is now %d\n",zombie->health);
+                }
+                }
+                }
+            
+        
         
 
         //Rendu character + animation 
@@ -237,12 +253,18 @@ int main() {
         }
         character_delay_frame++;
 
+        if (SDL_HasIntersection(&zombieRectDest, &characterRectdest)) {
+                    // Collision détectée
+                    if (SDL_GetTicks()-last_zombie_hit>=500){
+                        last_zombie_hit = SDL_GetTicks();
+                        character.health = character.health - zombie->attack_damage;
+                        printf("HIT! Loli's life is now %d\n",character.health);}
+                }
+
         // Rendu du fromage
         SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
         SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
 
-        // Rendu du zombie
-        render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
 
         SDL_RenderPresent(renderer);
 
