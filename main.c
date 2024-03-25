@@ -44,7 +44,8 @@ int main() {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in renderer init: %s", SDL_GetError());
         exit(-1);
     }
-
+    int running = 1;
+while(running){
     // selection aléatoire du fond d'écran
     int index = randomMapIndex();
     char *map = getMapFromIndex(index);
@@ -112,7 +113,7 @@ int main() {
 
 // Boucle principale****************************************************************************************
     SDL_Event event;
-    int running = 1;
+    int playing = 1;
 
     // Déclaration de variables pour suivre l'état des touches
     int key_up_pressed = 0;
@@ -132,14 +133,15 @@ int main() {
     int character_delay_frame = 0;//compteur pour ne pas actualiser a chaque rendu
     //
     int last_zombie_hit = -1000 ;
-    while (running) {
+    while (playing) {
         startTime = SDL_GetTicks();
 
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
                     // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
-                    running=0;
+                    running = 0;
+                    playing = 0;
                     break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
@@ -264,9 +266,24 @@ int main() {
         // Rendu du fromage
         SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
         SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+        if(character.health<=0){
+            SDL_RenderClear(renderer);
+            SDL_Texture* death_menu_texture=get_texture("assets/mort.png",renderer);
+            SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
 
+        }
+        else if(zombie->health <= 0 ){
+            SDL_RenderClear(renderer);
+            SDL_Texture* death_menu_texture=get_texture("assets/Cwin.png",renderer);
+            SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
+        }
 
         SDL_RenderPresent(renderer);
+
+         if(character.health<=0 | zombie->health <= 0){
+            SDL_Delay(2000);
+            playing = 0;
+            }
 
         // Cap the frame rate
         endTime = SDL_GetTicks();
@@ -277,13 +294,14 @@ int main() {
     }
 
     // Libérer la mémoire et quitter SDL
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(characterTexture);
     SDL_DestroyTexture(cheeseTexture);
     SDL_DestroyTexture(zombieTexture);
-    free(zombie);
+    free(zombie);}
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     printf("stoped the game\n");
     exit(-1);
