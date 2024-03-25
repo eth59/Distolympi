@@ -36,7 +36,7 @@ int main() {
         exit(-1);
     }
 
-    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+
     // Initialisation du renderer
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -60,9 +60,16 @@ int main() {
     // liberer la mémoire allouée a map et au filename de collisiontable
     free(map);
     free(collisionTableFileName);
-    // Charger la texture du personnage
-    SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
 
+// Charger la texture des attaques *************************************************************************
+    SDL_Texture *attacksTexture = get_texture("assets/Attaquesx.png",renderer);
+     // On divise la tileset du character 
+    int attacks_max_column_frame=5;
+    int attacks_max_line_frame=8;
+    SDL_Rect* attacksRectsrc=get_frames(32,32,attacks_max_line_frame,attacks_max_column_frame);
+
+// Charger la texture du personnage ************************************************************************
+    SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
     // Initialisation du personnage
     Character character = {
         .x = SCREEN_WIDTH / 2,
@@ -73,17 +80,16 @@ int main() {
         .hitBoxHeight = SCREEN_HEIGHT/36,
         .hitBoxWidth = SCREEN_WIDTH/32,
         .xHitBox = SCREEN_WIDTH/2 + SCREEN_WIDTH/64,
-        .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36
+        .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36,
+        .attack_speed = 0.5
     };
-    
-    
-
     // On divise la tileset du character 
-    int max_column_frame=8;
-    int max_line_frame=10;
-    SDL_Rect* characterRectsrc=get_frames(32,32,max_line_frame,max_column_frame);
+    int character_max_column_frame=8;
+    int character_max_line_frame=10;
+    SDL_Rect* characterRectsrc=get_frames(32,32,character_max_line_frame,character_max_column_frame);
 
-    // Initialisation d'un 1er objet : un fromage
+    
+// Initialisation d'un 1er objet : un fromage***************************************************************
     Object cheese = {
         .x = 50,
         .y = 50,
@@ -96,13 +102,13 @@ int main() {
     // Charger la texture du fromage
     SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
-    // Initialisation du zombie
+// Initialisation du zombie ********************************************************************************
     Enemy *zombie;
     SDL_Texture *zombieTexture;
     SDL_Rect *zombieRectSrc;
     init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
 
-    // Boucle principale
+// Boucle principale****************************************************************************************
     SDL_Event event;
     int running = 1;
 
@@ -111,10 +117,16 @@ int main() {
     int key_down_pressed = 0;
     int key_left_pressed = 0;
     int key_right_pressed = 0;
+    int attack_time;
+    int attacks_animation_frame = 0;
+    int attacks_delay_frame = 0;
+    int key_space_pressed=0;
+    int attack_dispo = 1;
+    int attack_flag = 0;
     // flags pour animation
-    int direction=0;
-    int animation_frame=0;//quel etape du cycle d'animation
-    int delay_frame=0;//compteur pour ne pas actualiser a chaque rendu
+    int direction = 0;
+    int character_animation_frame = 0;//quel etape du cycle d'animation
+    int character_delay_frame = 0;//compteur pour ne pas actualiser a chaque rendu
     while (running) {
         startTime = SDL_GetTicks();
 
@@ -140,6 +152,9 @@ int main() {
                         case SDLK_s:
                             key_down_pressed = 1;
                             break;
+                        case SDLK_SPACE:
+                            key_space_pressed = 1;
+                            break;
                     }
                     break;
                 case SDL_KEYUP:
@@ -157,6 +172,9 @@ int main() {
                             break;
                         case SDLK_s:
                             key_down_pressed = 0;
+                            break;
+                        case SDLK_SPACE:
+                            key_space_pressed = 0;
                             break;
                     }
                     break;
@@ -182,15 +200,42 @@ int main() {
         // rendu graphique
         SDL_RenderClear(renderer);
 
-    int max_column_frame = 8;
-    int max_line_frame = 10;
         // Dessiner le fond
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
+        //Rendu attacks 
+        if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
+            attack_dispo = 1;
+        }
+        if ((key_space_pressed && attack_dispo) | attack_flag){
+            attack_flag = 1;
+            attack_time=SDL_GetTicks();
+
+            SDL_Rect attacksRectdest = get_Rectdest_attacks(direction,character);
+            attacks_animation_frame=attacks_animation_frame%attacks_max_column_frame;// cycle d'animation
+            SDL_RenderCopy(renderer, attacksTexture, &attacksRectsrc[(direction-2)*attacks_max_column_frame+attacks_animation_frame], &attacksRectdest);
+            
+            if(attacks_delay_frame>5){
+                    attacks_animation_frame++;
+                    attacks_delay_frame=0;}     
+            attacks_delay_frame++;
+            if(attacks_animation_frame>4){
+                attack_dispo = 0;
+                attack_flag = 0;
+            }
+        }
+        
+
+        //Rendu character + animation 
         int key_pressed=key_down_pressed | key_left_pressed | key_right_pressed | key_up_pressed;//On regarde si une touche de direction est appuyé
-        animation_frame=animation_frame%max_column_frame;// cycle d'animation
+        character_animation_frame=character_animation_frame%character_max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
-        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*max_column_frame+animation_frame*key_pressed], &characterRectdest);
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
+        if(character_delay_frame>20/character.speed){
+            character_animation_frame++;
+            character_delay_frame=0;
+        }
+        character_delay_frame++;
 
         // Rendu du fromage
         SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
@@ -200,11 +245,6 @@ int main() {
         render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
 
         SDL_RenderPresent(renderer);
-        if(delay_frame>20/character.speed){
-            animation_frame++;
-            delay_frame=0;
-        }
-        delay_frame++;
 
         // Cap the frame rate
         endTime = SDL_GetTicks();

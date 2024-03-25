@@ -91,3 +91,18 @@ int get_direction_and_move(int key_up_pressed ,int key_down_pressed,int key_left
     }
     return direction;
 }
+
+
+SDL_Rect get_Rectdest_attacks(int destination,Character character){
+    destination=destination-2;
+    SDL_Rect Rectdest;
+    if(destination==0){SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y+(int)character.height, (int)character.width*1.5, (int)character.height};}
+    else if(destination==1){SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
+    else if(destination==2){SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y-(int)character.height/4, (int)character.width, (int)character.height*1.5};}
+    else if(destination==3){SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y-(int)character.height, (int)character.width, (int)character.height};}
+    else if(destination==4){SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y-(int)character.height, (int)character.width*1.5, (int)character.height};}
+    else if(destination==5){SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y-(int)character.height, (int)character.width, (int)character.height};}
+    else if(destination==6){SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y-(int)character.height/4, (int)character.width, (int)character.height*1.5};}
+    else if(destination==7){SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
+    return Rectdest;
+}
