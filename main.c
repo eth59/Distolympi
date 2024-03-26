@@ -44,6 +44,7 @@ int main() {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in renderer init: %s", SDL_GetError());
         exit(-1);
     }
+    SDL_Texture*  dead_zombie_texture = get_texture("assets/dead_zombie.png",renderer);
     int running = 1;
 while(running){
     // selection aléatoire du fond d'écran
@@ -62,14 +63,14 @@ while(running){
     free(map);
     free(collisionTableFileName);
 
-// Charger la texture des attaques *************************************************************************
+    // Charger la texture des attaques *************************************************************************
     SDL_Texture *attacksTexture = get_texture("assets/Attaquesx.png",renderer);
      // On divise la tileset du character 
     int attacks_max_column_frame=5;
     int attacks_max_line_frame=8;
     SDL_Rect* attacksRectsrc=get_frames(32,32,attacks_max_line_frame,attacks_max_column_frame);
 
-// Charger la texture du personnage ************************************************************************
+    // Charger la texture du personnage ************************************************************************
     SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
     // Initialisation du personnage
     Character character = {
@@ -92,7 +93,7 @@ while(running){
     SDL_Rect* characterRectsrc=get_frames(32,32,character_max_line_frame,character_max_column_frame);
 
     
-// Initialisation d'un 1er objet : un fromage***************************************************************
+    // Initialisation d'un 1er objet : un fromage***************************************************************
     Object cheese = {
         .x = 50,
         .y = 50,
@@ -105,13 +106,13 @@ while(running){
     // Charger la texture du fromage
     SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
-// Initialisation du zombie ********************************************************************************
+    // Initialisation du zombie ********************************************************************************
     Enemy *zombie;
     SDL_Texture *zombieTexture;
     SDL_Rect *zombieRectSrc;
     init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
 
-// Boucle principale****************************************************************************************
+    // Boucle principale****************************************************************************************
     SDL_Event event;
     int playing = 1;
 
@@ -134,7 +135,11 @@ while(running){
     int character_animation_frame = 0;//quel etape du cycle d'animation
     int character_delay_frame = 0;//compteur pour ne pas actualiser a chaque rendu
     //
+    int low_on_life_time;
+    int low_on_life_frame = 0;
+    SDL_Texture* low_on_life_texture = get_texture("assets/Low_life1.png",renderer);
     int last_zombie_hit = -1000 ;
+    int game_in_pause = 0;
     while (playing) {
         startTime = SDL_GetTicks();
 
@@ -169,6 +174,8 @@ while(running){
                         case SDLK_SPACE:
                             key_space_pressed = 1;
                             break;
+                        case SDLK_ESCAPE:
+                            game_in_pause = 1;
                     }
                     break;
                 case SDL_KEYUP:
@@ -199,8 +206,7 @@ while(running){
             direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
         }
 
-        // Actions mobs & gestion interaction
-        move_zombie(&zombie, &character);
+    
 
         // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
         if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
@@ -215,11 +221,16 @@ while(running){
         SDL_RenderClear(renderer);
 
         // Dessiner le fond
+        SDL_Rect backgroundRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT-120};
         SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-         // Rendu du zombie
-        render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
-        SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
+        if(zombie->health>0){
+            // Actions mobs & gestion interaction
+            move_zombie(&zombie, &character);
+            // Rendu du zombie
+            render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
+        }
+         SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
 
         //Rendu attacks 
         if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
@@ -229,7 +240,6 @@ while(running){
             attack_flag = 1;
             attack_time=SDL_GetTicks();
             int direction_attack = get_melee_direction(character.x + character.width/2,character.y + character.height/2,mouseX,mouseY);
-            printf("%d\n",direction_attack);
             SDL_Rect attacksRectdest = get_Rectdest_attacks(direction_attack,character);
             attacks_animation_frame=attacks_animation_frame%attacks_max_column_frame;// cycle d'animation
             SDL_RenderCopy(renderer, attacksTexture, &attacksRectsrc[(direction_attack)*attacks_max_column_frame+attacks_animation_frame], &attacksRectdest);
@@ -257,57 +267,91 @@ while(running){
         character_animation_frame=character_animation_frame%character_max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
+        
         if(character_delay_frame>20/character.speed){
             character_animation_frame++;
             character_delay_frame=0;
         }
         character_delay_frame++;
 
-        if (SDL_HasIntersection(&zombieRectDest, &characterRectdest)) {
-                    // Collision détectée
-                    if (SDL_GetTicks()-last_zombie_hit>=500){
-                        last_zombie_hit = SDL_GetTicks();
-                        character.health = character.health - zombie->attack_damage;
-                        printf("HIT! Loli's life is now %d\n",character.health);}
-                }
+        if (SDL_HasIntersection(&zombieRectDest, &characterRectdest) && zombie->health>0) {
+            // Collision détectée
+            if (SDL_GetTicks()-last_zombie_hit>=500){
+                last_zombie_hit = SDL_GetTicks();
+                character.health = character.health - zombie->attack_damage;
+                printf("HIT! Loli's life is now %d\n",character.health);
+            }
+        }
 
         // Rendu du fromage
         SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
         SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+
+        if(character.health<=20){
+            if( startTime-low_on_life_time>200){
+            low_on_life_time = startTime;
+            low_on_life_frame = 1 - low_on_life_frame;
+            low_on_life_texture = get_texture("assets/Low_life1.png",renderer);
+            if (low_on_life_frame == 1){low_on_life_texture = get_texture("assets/Low_life2.png",renderer);}}
+            SDL_RenderCopy(renderer,low_on_life_texture,NULL,&backgroundRect);
+        }
+
         if(character.health<=0){
-            SDL_RenderClear(renderer);
-            SDL_Texture* death_menu_texture=get_texture("assets/mort.png",renderer);
+            SDL_Texture* death_menu_texture=get_texture("assets/Wasted.png",renderer);
             SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
 
         }
         else if(zombie->health <= 0 ){
-            SDL_RenderClear(renderer);
-            SDL_Texture* death_menu_texture=get_texture("assets/Cwin.png",renderer);
-            SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
+            zombie->speed = 0;
+            SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDest);
         }
 
         SDL_RenderPresent(renderer);
 
-         if(character.health<=0 | zombie->health <= 0){
-            SDL_Delay(2000);
+         if(character.health<=0){
+            SDL_Delay(3000);
             playing = 0;
-            }
+        }
 
         // Cap the frame rate
         endTime = SDL_GetTicks();
         deltaTime = endTime - startTime;
         if (deltaTime < 1000 / FPS) {
             SDL_Delay((1000 / FPS) - deltaTime);
+            if(game_in_pause){
+                SDL_Texture* game_in_pause_texture = get_texture("assets/Game-in-pause.png",renderer);
+                SDL_RenderCopy(renderer,game_in_pause_texture,NULL,&backgroundRect);
+                SDL_RenderPresent(renderer);
+            }
+            while(game_in_pause){
+                if (SDL_PollEvent(&event)) {
+                    switch (event.type) {
+                        case SDL_QUIT:
+                            // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
+                            running = 0;
+                            playing = 0;
+                            game_in_pause = 0;
+                            break;
+                        case SDL_KEYDOWN:
+                            switch (event.key.keysym.sym) {
+                                case SDLK_ESCAPE:
+                                    game_in_pause = 0;
+                                    break;
+                            }
+                    }
+                }
+            }
         }
     }
-
+    
     // Libérer la mémoire et quitter SDL
 
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(characterTexture);
     SDL_DestroyTexture(cheeseTexture);
     SDL_DestroyTexture(zombieTexture);
-    free(zombie);}
+    free(zombie);
+}
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
