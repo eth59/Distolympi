@@ -121,6 +121,8 @@ while(running){
     int key_left_pressed = 0;
     int key_right_pressed = 0;
     int key_space_pressed=0;
+    int mouseX = 0;
+    int mouseY = 0;
     //attacks variables
     int attack_time;
     int attacks_animation_frame = 0;
@@ -142,6 +144,11 @@ while(running){
                     // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
                     running = 0;
                     playing = 0;
+                    break;
+                case SDL_MOUSEMOTION:
+                    // Récupération des coordonnées de la souris
+                    mouseX = event.motion.x;
+                    mouseY = event.motion.y;
                     break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
@@ -221,10 +228,11 @@ while(running){
         if ((key_space_pressed && attack_dispo) | attack_flag){
             attack_flag = 1;
             attack_time=SDL_GetTicks();
-
-            SDL_Rect attacksRectdest = get_Rectdest_attacks(direction,character);
+            int direction_attack = get_melee_direction(character.x + character.width/2,character.y + character.height/2,mouseX,mouseY);
+            printf("%d\n",direction_attack);
+            SDL_Rect attacksRectdest = get_Rectdest_attacks(direction_attack,character);
             attacks_animation_frame=attacks_animation_frame%attacks_max_column_frame;// cycle d'animation
-            SDL_RenderCopy(renderer, attacksTexture, &attacksRectsrc[(direction-2)*attacks_max_column_frame+attacks_animation_frame], &attacksRectdest);
+            SDL_RenderCopy(renderer, attacksTexture, &attacksRectsrc[(direction_attack)*attacks_max_column_frame+attacks_animation_frame], &attacksRectdest);
             
             if(attacks_delay_frame>5){
                     attacks_animation_frame++;
@@ -233,7 +241,7 @@ while(running){
             if(attacks_animation_frame>4){
                 attack_dispo = 0;
                 attack_flag = 0;
-                if (SDL_HasIntersection(&zombieRectDest, &zombieRectDest)) {
+                if (SDL_HasIntersection(&zombieRectDest, &attacksRectdest)) {
                     // Collision détectée
                         zombie->health = zombie->health - character.attack_damage;
                         printf("HIT! Zombie's life is now %d\n",zombie->health);

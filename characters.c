@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <math.h>
 #include "structures.h"
 #include "characters.h"
 #include "collisionHandling.h"
@@ -94,9 +95,9 @@ int get_direction_and_move(int key_up_pressed ,int key_down_pressed,int key_left
 
 
 SDL_Rect get_Rectdest_attacks(int destination,Character character){
-    destination=destination-2;
     SDL_Rect Rectdest;
-    if(destination==0){SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y+(int)character.height, (int)character.width*1.5, (int)character.height};}
+    if(destination==0)
+        {SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y+(int)character.height, (int)character.width*1.5, (int)character.height};}
     else if(destination==1)
         {SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
     else if(destination==2)
@@ -112,4 +113,30 @@ SDL_Rect get_Rectdest_attacks(int destination,Character character){
     else if(destination==7)
         {SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
     return Rectdest;
+}
+
+int get_melee_direction(int charX, int charY, int mouseX, int mouseY) {
+    // Calcul des coordonnées relatives de la souris par rapport au personnage
+    int relX = mouseX - charX;
+    int relY = mouseY - charY;
+
+    // Calcul de l'angle entre l'axe x positif et la ligne reliant le personnage et la souris
+    double angle = atan2(relY, relX);
+    
+    // Si l'angle est négatif, le convertir en un angle positif entre 0 et 2*PI
+    if (angle < 0) {
+        angle += 2 * M_PI;
+    }
+
+    // Convertir l'angle en un index de direction (de 0 à 8)
+    // On divise le cercle en 8 secteurs de 45 degrés chacun
+    // Chaque secteur est associé à un entier de 0 à 7, donc on multiplie l'angle par 4/pi et on arrondit au plus proche
+    int direction = (int)(angle * 4 / M_PI + 0.5);
+    
+
+    // Pour éviter que direction dépasse 8, on prend son modulo 8
+    direction +=6;
+    direction %= 8;
+
+    return direction;
 }

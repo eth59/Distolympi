@@ -22,8 +22,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->delay_frame = 0;
     (*zombie)->max_column_frame = 8;
     (*zombie)->max_line_frame = 10;
-    (*zombie)->attack_damage = 10;
-    (*zombie)->health = 20;
+    (*zombie)->attack_damage = 5;
+    (*zombie)->health = 30;
     
     // On divise le tileset du zombie
     *zombieRectSrc = get_frames(32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
