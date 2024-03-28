@@ -23,7 +23,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
 void move_zombie(Enemy **zombie, Character *character);
 int **readMapCollisionFile(char *fileName);
-int minDistance(int dist[], int vu[]);
-void printSolution(int dist[]); // ====== TEMPORAIRE =======
-void dijkstra(int **graph[V][V], int src);
+float **mapToGraph(int **map);
+int minDistance(float dist[], int vu[]);
+void printSolution(float dist[]); // ====== TEMPORAIRE =======
+void dijkstra(float **graph[V][V], int src);
 void pathfinding(Enemy *zombie, Character *character);

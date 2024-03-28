@@ -109,66 +109,100 @@ int **readMapCollisionFile(char *fileName)
     }
     
     // Mémoire mémoire je veux de la mémoire
-    int **map = (int**)malloc(MAP_HEIGHT * sizeof(int*));
-    for (int i = 0; i < MAP_HEIGHT; i++)
+    int **map = (int**)malloc((MAP_HEIGHT+2) * sizeof(int*));
+    for (int i = 0; i < MAP_HEIGHT+2; i++)
     {
-        int *temp = (int*)malloc(MAP_WIDTH * sizeof(int));
+        int *temp = (int*)malloc((MAP_WIDTH+2) * sizeof(int));
         map[i] = temp;
     }
 
     // on ajoute tous les caractères du fichier a la chaine
     int i = 0, j = 0, character;
-    while ((character = fgetc(file)) != EOF) { 
-        map[i][j] = (int)character - (int)'0';
-        j += i % MAP_WIDTH;
-        i = (i+1) / MAP_WIDTH;
+    while ((character = fgetc(file)) != EOF) {
+        map[i][j] = character - '0';
+        i += j == MAP_WIDTH+1;
+        j = (j+1) % (MAP_WIDTH+2);
     } 
-    fclose(file);
-    
+    fclose(file);    
     return map;
 }
 
 // On convertit la map qu'on a lu du fichier en un graphe pour dijkstra
-int **mapToGraph(int **map)
+float **mapToGraph(int **map)
 {
     // Mémoire mémoire je veux toujours plus de mémoire
-    int **graph = (int**)malloc(V * sizeof(int*));
+    float **graph = (float**)malloc(V * sizeof(float*));
     for (int v = 0; v < V; v++)
     {
-        int *temp = (int*)calloc(V, sizeof(int));
+        float *temp = (float*)calloc(V, sizeof(float));
         graph[v] = temp;
     }
 
-    // On parcourt la map, si c'est pas 0
-    // On regarde les 8 directions alentours et si c pas 0, on a trouvé une arrête
-
+    // On met les arrêtes dans le graphe avec un poids de 1 pour les cases à côté
+    // Donc un poids de sqrt(2) en diagonale (merci pythagore)
+    for (int i = 1; i < MAP_HEIGHT+1; i++)
+    {
+        for (int j = 1; j < MAP_WIDTH+1; j++)
+        {
+            if (map[i][j] == 0)
+            {            
+                if (map[i][j+1] == 0)
+                {
+                    // On regarde à droite
+                    graph[(i-1)*MAP_WIDTH+j-1][(i-1)*MAP_WIDTH+j] = 1;
+                    graph[(i-1)*MAP_WIDTH+j][(i-1)*MAP_WIDTH+j-1] = 1;
+                }
+                if (map[i+1][j+1] == 0)
+                {
+                    // On regarde en bas à droite
+                    graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j] = sqrt(2);
+                    graph[i*MAP_WIDTH+j][(i-1)*MAP_WIDTH+j-1] = sqrt(2);
+                }
+                if (map[i+1][j] == 0)
+                {
+                    // On regarde en bas
+                    graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j-1] = 1;
+                    graph[i*MAP_WIDTH+j-1][(i-1)*MAP_WIDTH+j-1] = 1;
+                }
+                if (map[i+1][j-1] == 0)
+                {
+                    // On regarde en bas à gauche
+                    graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j-2] = sqrt(2);
+                    graph[i*MAP_WIDTH+j-2][(i-1)*MAP_WIDTH+j-1] = sqrt(2);
+                }   
+            }
+        }
+    }
     return graph;
 }
 
 // Calcule le sommet à distance minimale pour dijkstra
-int minDistance(int dist[], int vu[])
+int minDistance(float dist[], int vu[])
 {
-    int min = INT_MAX, min_index;
+    float min = FLT_MAX;
+    int min_index;
 
     for (int v = 0; v < V; v++)
         if (!vu[v] && dist[v] <= min)
-            min = dist[v], min_index = v;
-    
+        {
+            min = dist[v];
+            min_index = v;
+        }
     return min_index;
 }
 
 // ========== TEMPORAIRE =======
-void printSolution(int dist[])
+void printSolution(float dist[])
 {
     printf("Vertex \t\t Distance from Source\n");
     for (int i = 0; i < V; i++)
-        printf("%d \t\t\t\t %d\n", i, dist[i]);
+        printf("%d \t\t\t\t %f\n", i, dist[i]);
 }
 
 // Dijkstra
-void dijkstra(int **graph[V][V], int src)
+void dijkstra(float **graph[V][V], int src)
 {
-    int dist[V]; // Le tableau de retour avec toutes les distances
+    float dist[V]; // Le tableau de retour avec toutes les distances
     int vu[V]; // Pour garder en mémoire les sommets vus
 
     // On cherche le chemin le plus court pour tous les sommets
@@ -197,8 +231,16 @@ void dijkstra(int **graph[V][V], int src)
 // Pathfinding
 void pathfinding(Enemy *zombie, Character *character)
 {
-    int** map = createGraph("assets/map01.txt");
-    // FAUT LE TRANSFORMER EN GRAPH
+    int** map = readMapCollisionFile("assets/map01.txt");
+    for (int i = 0; i < MAP_HEIGHT+2; i++)
+    {
+        for (int j = 0; j < MAP_WIDTH+2; j++)
+        {
+            printf("%d ", map[i][j]);
+        }
+        printf("\n");
+    }
+    float** graph = mapToGraph(map);
     int tileWidth = 1920 / MAP_WIDTH;
     int tileHeight = 1080 / MAP_HEIGHT;
     int zombieTileX = (int)(zombie->x / tileWidth);
@@ -211,4 +253,9 @@ void pathfinding(Enemy *zombie, Character *character)
     printf("%d\n", characterSommet);
 
     // FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE
+    for (int i = 0; i < MAP_HEIGHT+2; i++)
+    {
+        free(map[i]);
+    }
+    free(map);
 }
