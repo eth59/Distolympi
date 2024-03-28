@@ -138,7 +138,6 @@ while(running){
     int attacks_delay_frame = 0;
     int attack_dispo = 1;
     int attack_flag = 0;
-    int key_e_pressed = 0;
 
     int cheeseAdded = 0;
 
@@ -171,6 +170,23 @@ while(running){
                     switch (event.key.keysym.sym) {
                         // Pour chaque touche de déplacement on met le booléen
                         // correspondant à 1 quand la touche est pressée
+                        case SDLK_ESCAPE:
+                            game_in_pause = 1;
+                            key_left_pressed = 0;
+                            key_right_pressed = 0;
+                            key_up_pressed = 0;
+                            key_down_pressed = 0;
+                            break;
+                        case SDLK_e:
+                            // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
+                            if (!cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
+                                character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
+                                add_to_inventory(&character.inventory, cheese);
+                                cheese.ground = 0; 
+                                SDL_DestroyTexture(cheeseTexture);
+                                cheeseAdded = 1;
+                            }
+                            break;
                         case SDLK_q:
                             key_left_pressed = 1;
                             break;
@@ -185,11 +201,6 @@ while(running){
                             break;
                         case SDLK_SPACE:
                             key_space_pressed = 1;
-                            break;
-                        case SDLK_ESCAPE:
-                            game_in_pause = 1;
-                        case SDLK_e:
-                            key_e_pressed = 1;
                             break;
                     }
                     break;
@@ -211,8 +222,6 @@ while(running){
                             break;
                         case SDLK_SPACE:
                             key_space_pressed = 0;
-                        case SDLK_e:
-                            key_e_pressed = 0;
                             break;
                     }
                     break;
@@ -221,17 +230,6 @@ while(running){
 
         if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
             direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
-        }
-
-    
-
-        // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
-        if (key_e_pressed && !cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
-            character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
-            add_to_inventory(&character.inventory, cheese);
-            cheese.ground = 0; 
-            SDL_DestroyTexture(cheeseTexture);
-            cheeseAdded = 1;
         }
 
         // rendu graphique
