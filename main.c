@@ -1,15 +1,14 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <stdio.h>
 #include "structures.h"
 #include "characters.h"
 #include "animations.h"
 #include "selectRandomMap.h"
 #include "collisionHandling.h"
 #include "enemies.h"
+#include "inventory.h"
 
-#define SCREEN_WIDTH 1920
-#define SCREEN_HEIGHT 1080
-#define FPS 240
 
 int main() {
     Uint32 startTime, endTime, deltaTime;
@@ -35,7 +34,6 @@ int main() {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
         exit(-1);
     }
-
 
     // Initialisation du renderer
     SDL_Renderer *renderer;
@@ -86,6 +84,7 @@ while(running){
         .attack_speed = 0.5,
         .health = 100,
         .attack_damage = 10,
+        .inventory = {0}
     };
     // On divise la tileset du character 
     int character_max_column_frame=8;
@@ -113,6 +112,14 @@ while(running){
     init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
 
     // Boucle principale****************************************************************************************
+    // Charger la texture de l'inventaire
+    SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
+    if (!inventoryTexture) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading inventory texture: %s", SDL_GetError());
+        exit(-1);
+    }
+
+    // Boucle principale
     SDL_Event event;
     int playing = 1;
 
@@ -124,12 +131,17 @@ while(running){
     int key_space_pressed=0;
     int mouseX = 0;
     int mouseY = 0;
+    
     //attacks variables
     int attack_time;
     int attacks_animation_frame = 0;
     int attacks_delay_frame = 0;
     int attack_dispo = 1;
     int attack_flag = 0;
+    int key_e_pressed = 0;
+
+    int cheeseAdded = 0;
+
     // flags pour animation
     int direction = 0;
     int character_animation_frame = 0;//quel etape du cycle d'animation
@@ -176,6 +188,9 @@ while(running){
                             break;
                         case SDLK_ESCAPE:
                             game_in_pause = 1;
+                        case SDLK_e:
+                            key_e_pressed = 1;
+                            break;
                     }
                     break;
                 case SDL_KEYUP:
@@ -196,6 +211,8 @@ while(running){
                             break;
                         case SDLK_SPACE:
                             key_space_pressed = 0;
+                        case SDLK_e:
+                            key_e_pressed = 0;
                             break;
                     }
                     break;
@@ -209,16 +226,19 @@ while(running){
     
 
         // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
-        if (character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
+        if (key_e_pressed && !cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
             character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
-            cheese.ground = 0; // le fromage est dans l'inventaire maintenant
+            add_to_inventory(&character.inventory, cheese);
+            cheese.ground = 0; 
             SDL_DestroyTexture(cheeseTexture);
+            cheeseAdded = 1;
         }
-
-        // Changement états du jeu - TO DO
 
         // rendu graphique
         SDL_RenderClear(renderer);
+
+        int max_column_frame = 8;
+        int max_line_frame = 10;
 
         // Dessiner le fond
         SDL_Rect backgroundRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT-120};
@@ -260,8 +280,6 @@ while(running){
                 }
             
         
-        
-
         //Rendu character + animation 
         int key_pressed=key_down_pressed | key_left_pressed | key_right_pressed | key_up_pressed;//On regarde si une touche de direction est appuyé
         character_animation_frame=character_animation_frame%character_max_column_frame;// cycle d'animation
@@ -306,13 +324,11 @@ while(running){
             SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDest);
         }
 
+        // Dessin de l'inventaire
+        draw_inventory_bar(renderer, character, inventoryTexture);
+
         SDL_RenderPresent(renderer);
-
-         if(character.health<=0){
-            SDL_Delay(3000);
-            playing = 0;
-        }
-
+        
         // Cap the frame rate
         endTime = SDL_GetTicks();
         deltaTime = endTime - startTime;
@@ -345,17 +361,21 @@ while(running){
     }
     
     // Libérer la mémoire et quitter SDL
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
 
     SDL_DestroyTexture(backgroundTexture);
     SDL_DestroyTexture(characterTexture);
     SDL_DestroyTexture(cheeseTexture);
     SDL_DestroyTexture(zombieTexture);
+    SDL_DestroyTexture(inventoryTexture);
+
     free(zombie);
 }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    printf("stoped the game\n");
-    exit(-1);
+    printf("Stopped the game.\n");
+
     return 0;
 }
