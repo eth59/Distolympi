@@ -23,7 +23,7 @@ void add_to_inventory(Inventory *inventory, Object item) {
 // Fonction pour ajouter un objet à l'inventaire
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture) {
     // Définir la position et la taille de l'inventaire
-    SDL_Rect inventoryRect = {0, SCREEN_HEIGHT - 200, SCREEN_WIDTH, 200};
+    SDL_Rect inventoryRect = {0, SCREEN_HEIGHT - SCREEN_HEIGHT/9, SCREEN_WIDTH, SCREEN_HEIGHT/9};
 
     // Dessiner un rectangle temporaire à la position et à la taille de l'inventaire
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
