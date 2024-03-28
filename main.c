@@ -138,6 +138,10 @@ while(running){
     while (playing) {
         startTime = SDL_GetTicks();
 
+        pathfinding(zombie, &character);
+        running = 0;
+        playing = 0;
+
         if (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:

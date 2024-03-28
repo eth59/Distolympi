@@ -1,3 +1,8 @@
+#define PI 3.14159265358979323846264338327950288 
+#define MAP_WIDTH 14 // Largeur de la map (hors mur extérieur)
+#define MAP_HEIGHT 6 // Hauteur de la map (hors mur extérieur)
+#define V (MAP_WIDTH*MAP_HEIGHT) // Taille de la map (hors mur extérieur) pour dijkstra
+
 // Structure pour les ennemis
 typedef struct {
     float x;
@@ -17,3 +22,8 @@ typedef struct {
 void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc);
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
 void move_zombie(Enemy **zombie, Character *character);
+int **readMapCollisionFile(char *fileName);
+int minDistance(int dist[], int vu[]);
+void printSolution(int dist[]); // ====== TEMPORAIRE =======
+void dijkstra(int **graph[V][V], int src);
+void pathfinding(Enemy *zombie, Character *character);
