@@ -46,7 +46,7 @@ void moveCharacter(Character *character, SDL_DisplayMode displayMode, float dx, 
     }
 
     // on ajuste la position du personnage en fonction
-    if ((collisionX || collisionXHeight) && (!collisionY && collisionYWidth)) {
+    if ((collisionX || collisionXHeight) && (!collisionY && !collisionYWidth)) {
         character->yHitBox += dy;
         character->y += dy;
     } else if ((!collisionX && !collisionXHeight) && (collisionY || collisionYWidth)) {
