@@ -33,14 +33,14 @@ void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture
     SDL_RenderCopy(renderer, inventoryTexture, NULL, &inventoryRect);
 
     // Définir la position et la taille d'un slot d'inventaire
-    SDL_Rect slotRect = {10, SCREEN_HEIGHT - 190, 180, 180};
+    SDL_Rect slotRect = {0, SCREEN_HEIGHT - SCREEN_HEIGHT/9, SCREEN_HEIGHT/9, SCREEN_HEIGHT/9};
 
     // Parcourir tous les slots d'inventaire
     for (int i = 0; i < MAX_INVENTORY_SIZE; i++) {
         // Vérifier si le slot d'inventaire est occupé
         if (i < character.inventory.count) {            
             // Définir la position et la taille de l'objet dans le slot
-            SDL_Rect itemRect = {slotRect.x + 10, slotRect.y + 10, 160, 160};
+            SDL_Rect itemRect = {slotRect.x + 10, slotRect.y + 10, SCREEN_HEIGHT/9 - 10, SCREEN_HEIGHT/9 - 10};
             SDL_Texture* itemTexture = get_texture("assets/cheese.png", renderer);
             SDL_RenderCopy(renderer, itemTexture, NULL, &itemRect);
             SDL_DestroyTexture(itemTexture);
