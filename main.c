@@ -284,7 +284,7 @@ while(running){
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_Rect characterHitboxRect = {character.xHitBox, character.y, character.hitBoxWidth, character.height};
         SDL_Rect zombieHitboxRect = {zombie->x + SCREEN_WIDTH/64, zombie->y, zombie->width - SCREEN_WIDTH/32, zombie->height};
-        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
+        
         
         if(character_delay_frame>20/character.speed){
             character_animation_frame++;
@@ -324,6 +324,9 @@ while(running){
             SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDest);
         }
 
+        // On dessine le personnage tout a la fin pour que la texture soit au dessus de toutes les autres
+        SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
+        
         // Dessin de l'inventaire
         draw_inventory_bar(renderer, character, inventoryTexture);
 
