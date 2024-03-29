@@ -191,47 +191,44 @@ int minDistance(float dist[], int vu[])
     return min_index;
 }
 
-// ========== TEMPORAIRE =======
-void printSolution(float dist[])
-{
-    printf("Vertex \t\t Distance from Source\n");
-    for (int i = 0; i < V; i++)
-        printf("%d \t\t\t\t %f\n", i, dist[i]);
-}
-
 // Dijkstra
-void dijkstra(float **graph, int src)
+void dijkstra(float **graph, int src, int dest)
 {
-    float dist[V]; // Le tableau de retour avec toutes les distances
+    float dist[V]; // Le tableau où on va stocker les distances à la src
     for (int i = 0; i < V; i++)
     {
         dist[i] = FLT_MAX;
     }
-    dist[src] = 0;
-    int vu[V] = {0}; // Pour garder en mémoire les sommets vus
+    dist[src] = 0; // La seule valeur qu'on connaît
+    int vu[V] = {0}; // Pour savoir les sommets qu'on a déjà vu
+    int pred[V]; // Tableau avec les prédécesseurs dans le parcours
 
-    // On cherche le chemin le plus court pour tous les sommets
+    // boucle principale de dijkstra
     for (int i = 0; i < V-1; i++)
     {
-        // On prend le sommet non traîté le + proche
+        // On prend le sommet qu'on a pas vu le + proche
         int u = minDistance(dist, vu);
-        vu[u] = 1; // On le marque comme vu
+        vu[u] = 1; // du coup on l'a vu
 
-        // On met à jour la distance des sommets adjacents
+        // On change les distances des voisins
         for (int v = 0; v < V; v++)
-            // On met à jour dist[v] ssi v n'a pas été vu
-            // et il y a une arête entre u et v et que le chemin est plus court
-            // en passant par u que par le chemin actuel
-            // jusque v (ie de longueur dist[v])
+        {
             if (graph[u][v] && dist[u] != INT_MAX && dist[u] + graph[u][v] < dist[v])
             {
-                dist[v] = dist[u] + graph[u][v];
+                dist[v] = dist[u] + graph[u][v]; // On met à jour la distance
+                pred[v] = u; // On stocke le prédécesseur
             }
+        }
     }
-
-    printSolution(dist); // TEMPORAIRE  
-
-    printf("===================\n\n\n");
+    // On va afficher le chemin pour atteindre la dest depuis la src
+    int u = dest;
+    printf("Chemin le plus court : %d ", u);
+    while (u != src)
+    {
+        u = pred[u];
+        printf("<- %d ", u);
+    }
+    printf("\n");
 } 
 
 // Pathfinding
@@ -255,8 +252,7 @@ void pathfinding(Enemy *zombie, Character *character)
     int characterTileX = (int)(character->x / tileWidth);
     int characterTileY = (int)(character->y / tileHeight);
     int characterSommet = characterTileY * MAP_WIDTH + characterTileX;
-    dijkstra(graph, zombieSommet);
-    printf("%d\n", characterSommet);
+    dijkstra(graph, zombieSommet, characterSommet);
 
     // FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE
     for (int i = 0; i < MAP_HEIGHT+2; i++)
