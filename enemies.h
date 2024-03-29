@@ -5,10 +5,12 @@
 
 // Structure pour les ennemis
 typedef struct {
-    float x;
-    float y;
+    int x;
+    int y;
     int width; // largeur pour le rendu
     int height; // hauteur pour le rendu
+    int nextX; // Coordonnées vers laquelle le zombie va se déplacer
+    int nextY; // Coordonnées vers laquelle le zombie va se déplacer
     float speed;
     int direction; // Pour l'animation
     int animation_frame; // Pour l'animation, l'étape du cycle d'animation
@@ -21,10 +23,10 @@ typedef struct {
 
 void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc);
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
-void move_zombie(Enemy **zombie, Character *character);
+void move_zombie(Enemy **zombie);
 int **readMapCollisionFile(char *fileName);
 float **mapToGraph(int **map);
 int minDistance(float dist[], int vu[]);
 void printSolution(float dist[]); // ====== TEMPORAIRE =======
-void dijkstra(float **graph, int src, int dest);
-void pathfinding(Enemy *zombie, Character *character);
+int dijkstra(float **graph, int src, int dest);
+void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileName);

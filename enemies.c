@@ -17,6 +17,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->y = 100;
     (*zombie)->width = 130;
     (*zombie)->height = 130;
+    (*zombie)->nextX = 100;
+    (*zombie)->nextY = 100;
     (*zombie)->speed = 1.5;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
@@ -37,10 +39,11 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
     SDL_RenderCopy(renderer, zombieTexture, &zombieRectSrc[sprite_nb], &zombieRectDest);
 }
 
-void move_zombie(Enemy **zombie, Character *character)
+void move_zombie(Enemy **zombie)
 {
-    float dx = character->x - (*zombie)->x;
-    float dy = character->y - (*zombie)->y;
+    printf("On va en : %d %d\n", (*zombie)->nextX, (*zombie)->nextY);
+    int dx = (*zombie)->nextX - (*zombie)->x;
+    int dy = (*zombie)->nextY - (*zombie)->y;
 
     // Calcul de l'angle entre le zombie et le joueur
     // On redéfinit PI parce que flemme de l'erreur de vs code
@@ -192,7 +195,7 @@ int minDistance(float dist[], int vu[])
 }
 
 // Dijkstra
-void dijkstra(float **graph, int src, int dest)
+int dijkstra(float **graph, int src, int dest)
 {
     float dist[V]; // Le tableau où on va stocker les distances à la src
     for (int i = 0; i < V; i++)
@@ -220,21 +223,19 @@ void dijkstra(float **graph, int src, int dest)
             }
         }
     }
-    // On va afficher le chemin pour atteindre la dest depuis la src
     int u = dest;
-    printf("Chemin le plus court : %d ", u);
-    while (u != src)
+    while (pred[u] != src)
     {
         u = pred[u];
-        printf("<- %d ", u);
     }
-    printf("\n");
+    return u; // on retourne la prochaine tile sur laquelle le zombie doit aller
 } 
 
 // Pathfinding
-void pathfinding(Enemy *zombie, Character *character)
+void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileName)
 {
-    int** map = readMapCollisionFile("assets/map01.txt");
+    printf("%s\n", collisionTableFileName);
+    int** map = readMapCollisionFile(collisionTableFileName);
     for (int i = 0; i < MAP_HEIGHT+2; i++)
     {
         for (int j = 0; j < MAP_WIDTH+2; j++)
@@ -249,10 +250,14 @@ void pathfinding(Enemy *zombie, Character *character)
     int zombieTileX = (int)(zombie->x / tileWidth);
     int zombieTileY = (int)(zombie->y / tileHeight);
     int zombieSommet = zombieTileY * MAP_WIDTH + zombieTileX;
+    printf("On est en %d.\n"), zombieSommet;
     int characterTileX = (int)(character->x / tileWidth);
     int characterTileY = (int)(character->y / tileHeight);
     int characterSommet = characterTileY * MAP_WIDTH + characterTileX;
-    dijkstra(graph, zombieSommet, characterSommet);
+    int nextSommet = dijkstra(graph, zombieSommet, characterSommet);
+    printf("On doit aller en %d.\n", nextSommet);
+    zombie->nextX = ((nextSommet / MAP_WIDTH)+1)*tileHeight; // il y a un +1 pour le mur du haut
+    zombie->nextY = ((nextSommet % MAP_WIDTH)+1)*tileWidth; // il y a un +1 pour le mur de gauche
 
     // FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE
     for (int i = 0; i < MAP_HEIGHT+2; i++)
