@@ -283,6 +283,7 @@ while(running){
         character_animation_frame=character_animation_frame%character_max_column_frame;// cycle d'animation
         SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
         SDL_Rect characterHitboxRect = {character.xHitBox, character.y, character.hitBoxWidth, character.height};
+        SDL_Rect zombieHitboxRect = {zombie->x + SCREEN_WIDTH/64, zombie->y, zombie->width - SCREEN_WIDTH/32, zombie->height};
         SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
         
         if(character_delay_frame>20/character.speed){
@@ -291,7 +292,7 @@ while(running){
         }
         character_delay_frame++;
 
-        if (SDL_HasIntersection(&zombieRectDest, &characterHitboxRect) && zombie->health>0) {
+        if (SDL_HasIntersection(&zombieHitboxRect, &characterHitboxRect) && zombie->health>0) {
             // Collision détectée
             if (SDL_GetTicks()-last_zombie_hit>=500){
                 last_zombie_hit = SDL_GetTicks();
@@ -316,7 +317,6 @@ while(running){
         if(character.health<=0){
             SDL_Texture* death_menu_texture=get_texture("assets/Wasted.png",renderer);
             SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
-
             SDL_DestroyTexture(characterTexture);
         }
         else if(zombie->health <= 0 ){
