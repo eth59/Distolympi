@@ -200,10 +200,15 @@ void printSolution(float dist[])
 }
 
 // Dijkstra
-void dijkstra(float **graph[V][V], int src)
+void dijkstra(float **graph, int src)
 {
     float dist[V]; // Le tableau de retour avec toutes les distances
-    int vu[V]; // Pour garder en mémoire les sommets vus
+    for (int i = 0; i < V; i++)
+    {
+        dist[i] = FLT_MAX;
+    }
+    dist[src] = 0;
+    int vu[V] = {0}; // Pour garder en mémoire les sommets vus
 
     // On cherche le chemin le plus court pour tous les sommets
     for (int i = 0; i < V-1; i++)
@@ -218,9 +223,10 @@ void dijkstra(float **graph[V][V], int src)
             // et il y a une arête entre u et v et que le chemin est plus court
             // en passant par u que par le chemin actuel
             // jusque v (ie de longueur dist[v])
-            if (!vu[v] && graph[u][v] && dist[u] != INT_MAX
-                && dist[u] + graph[u][v] < dist[v])
+            if (graph[u][v] && dist[u] != INT_MAX && dist[u] + graph[u][v] < dist[v])
+            {
                 dist[v] = dist[u] + graph[u][v];
+            }
     }
 
     printSolution(dist); // TEMPORAIRE  
@@ -258,4 +264,9 @@ void pathfinding(Enemy *zombie, Character *character)
         free(map[i]);
     }
     free(map);
+    for (int i = 0; i < V; i++)
+    {
+        free(graph[i]);
+    }
+    free(graph);
 }

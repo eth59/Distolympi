@@ -26,5 +26,5 @@ int **readMapCollisionFile(char *fileName);
 float **mapToGraph(int **map);
 int minDistance(float dist[], int vu[]);
 void printSolution(float dist[]); // ====== TEMPORAIRE =======
-void dijkstra(float **graph[V][V], int src);
+void dijkstra(float **graph, int src);
 void pathfinding(Enemy *zombie, Character *character);
