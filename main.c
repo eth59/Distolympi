@@ -374,6 +374,10 @@ while(running){
     SDL_DestroyTexture(zombieTexture);
     SDL_DestroyTexture(inventoryTexture);
 
+    free(characterRectsrc);
+    free(attacksRectsrc);
+    free(collisionTable);
+    free(zombieRectSrc);
     free(zombie);
 }
     SDL_DestroyRenderer(renderer);
