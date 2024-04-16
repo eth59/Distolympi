@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = $(shell sdl2-config --cflags)
+CFLAGS = $(shell sdl2-config --cflags) -g -fsanitize=address -fno-omit-frame-pointer
 LIBS = $(shell sdl2-config --libs) -lSDL2_image -lm
 
 SRC = $(wildcard *.c)
