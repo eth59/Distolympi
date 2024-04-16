@@ -17,8 +17,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->y = 100;
     (*zombie)->width = 130;
     (*zombie)->height = 130;
-    (*zombie)->nextX = 100;
-    (*zombie)->nextY = 100;
+    (*zombie)->currentVertex = 0;
+    (*zombie)->nextVertex = 0;
     (*zombie)->speed = 1.5;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
@@ -41,53 +41,48 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
 
 void move_zombie(Enemy **zombie)
 {
-    printf("On va en : %d %d\n", (*zombie)->nextX, (*zombie)->nextY);
-    int dx = (*zombie)->nextX - (*zombie)->x;
-    int dy = (*zombie)->nextY - (*zombie)->y;
-
-    // Calcul de l'angle entre le zombie et le joueur
-    // On redéfinit PI parce que flemme de l'erreur de vs code
-    float angle = atan2(dy, dx) * 180 / PI; 
-
-    // Convertion de l'angle en une direction + déplacement du zombie
-    // On multiplie par sqrt(2) en diagonale
-    // pour éviter une impression de vitesse plus élevée
-    if (angle >= -22.5 && angle < 22.5) {
-        // Droite
-        (*zombie)->direction = 8;
-        (*zombie)->x += (*zombie)->speed;
-    } else if (angle >= 22.5 && angle < 67.5) {
-        // Bas droite
-        (*zombie)->direction = 9;
-        (*zombie)->x += (*zombie)->speed*0.7071f;
-        (*zombie)->y += (*zombie)->speed*0.7071f;
-    } else if (angle >= 67.5 && angle < 112.5) {
-        // Bas
-        (*zombie)->direction = 2;
-        (*zombie)->y += (*zombie)->speed;
-    } else if (angle >= 112.5 && angle < 157.5) {
-        // Bas gauche
-        (*zombie)->direction = 3;
-        (*zombie)->x -= (*zombie)->speed*0.7071f;
-        (*zombie)->y += (*zombie)->speed*0.7071f;
-    } else if (angle >= 157.5 || angle < -157.5) {
-        // Gauche
-        (*zombie)->direction = 4;
-        (*zombie)->x -= (*zombie)->speed;
-    } else if (angle >= -157.5 && angle < -112.5) {
-        // Haut gauche
-        (*zombie)->direction = 5;
-        (*zombie)->x -= (*zombie)->speed*0.7071f;
-        (*zombie)->y -= (*zombie)->speed*0.7071f;
-    } else if (angle >= -112.5 && angle < -67.5) {
-        // Haut
-        (*zombie)->direction = 6;
-        (*zombie)->y -= (*zombie)->speed;
-    } else {
-        // Haut droite
-        (*zombie)->direction = 7;
-        (*zombie)->x += (*zombie)->speed*0.7071f;
-        (*zombie)->y -= (*zombie)->speed*0.7071f;
+    if ((*zombie)->currentVertex != (*zombie)->nextVertex) {
+        int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
+        // Convertion de l'angle en une direction + déplacement du zombie
+        // On multiplie par sqrt(2) en diagonale
+        // pour éviter une impression de vitesse plus élevée
+        if (diff == 1) {
+            // Droite
+            (*zombie)->direction = 8;
+            (*zombie)->x += (*zombie)->speed;
+        } else if (diff == MAP_WIDTH + 1) {
+            // Bas droite
+            (*zombie)->direction = 9;
+            (*zombie)->x += (*zombie)->speed*0.7071f;
+            (*zombie)->y += (*zombie)->speed*0.7071f;
+        } else if (diff == MAP_WIDTH) {
+            // Bas
+            (*zombie)->direction = 2;
+            (*zombie)->y += (*zombie)->speed;
+        } else if (diff == MAP_WIDTH - 1) {
+            // Bas gauche
+            (*zombie)->direction = 3;
+            (*zombie)->x -= (*zombie)->speed*0.7071f;
+            (*zombie)->y += (*zombie)->speed*0.7071f;
+        } else if (diff == -1) {
+            // Gauche
+            (*zombie)->direction = 4;
+            (*zombie)->x -= (*zombie)->speed;
+        } else if (diff == -MAP_WIDTH - 1) {
+            // Haut gauche
+            (*zombie)->direction = 5;
+            (*zombie)->x -= (*zombie)->speed*0.7071f;
+            (*zombie)->y -= (*zombie)->speed*0.7071f;
+        } else if (diff == -MAP_WIDTH) {
+            // Haut
+            (*zombie)->direction = 6;
+            (*zombie)->y -= (*zombie)->speed;
+        } else {
+            // Haut droite
+            (*zombie)->direction = 7;
+            (*zombie)->x += (*zombie)->speed*0.7071f;
+            (*zombie)->y -= (*zombie)->speed*0.7071f;
+        }
     }
 
     // On met à jour les paramètres de l'animation
@@ -143,6 +138,9 @@ float **mapToGraph(int **map)
 
     // On met les arrêtes dans le graphe avec un poids de 1 pour les cases à côté
     // Donc un poids de sqrt(2) en diagonale (merci pythagore)
+    int droite = 0;
+    int gauche = 0;
+    int bas = 0;
     for (int i = 1; i < MAP_HEIGHT+1; i++)
     {
         for (int j = 1; j < MAP_WIDTH+1; j++)
@@ -152,28 +150,41 @@ float **mapToGraph(int **map)
                 if (map[i][j+1] == 0)
                 {
                     // On regarde à droite
+                    droite = 1;
                     graph[(i-1)*MAP_WIDTH+j-1][(i-1)*MAP_WIDTH+j] = 1;
                     graph[(i-1)*MAP_WIDTH+j][(i-1)*MAP_WIDTH+j-1] = 1;
                 }
-                if (map[i+1][j+1] == 0)
+                if (map[i][j-1] == 0)
+                {
+                    // On regarde à gauche
+                    gauche = 1;
+                }
+                if (map[i+1][j] == 0)
+                {
+                    // On regarde en bas
+                    bas = 1;
+                    graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j-1] = 1;
+                    graph[i*MAP_WIDTH+j-1][(i-1)*MAP_WIDTH+j-1] = 1;
+                }
+
+                // Pour les diagonales, on veut y aller que si les cases à côté sont libres
+                // Sinon l'ennemi marche sur un rocher et ça c'est pas cool
+                if (map[i+1][j+1] == 0 && bas && droite)
                 {
                     // On regarde en bas à droite
                     graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j] = sqrt(2);
                     graph[i*MAP_WIDTH+j][(i-1)*MAP_WIDTH+j-1] = sqrt(2);
                 }
-                if (map[i+1][j] == 0)
-                {
-                    // On regarde en bas
-                    graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j-1] = 1;
-                    graph[i*MAP_WIDTH+j-1][(i-1)*MAP_WIDTH+j-1] = 1;
-                }
-                if (map[i+1][j-1] == 0)
+                if (map[i+1][j-1] == 0 && bas && gauche)
                 {
                     // On regarde en bas à gauche
                     graph[(i-1)*MAP_WIDTH+j-1][i*MAP_WIDTH+j-2] = sqrt(2);
                     graph[i*MAP_WIDTH+j-2][(i-1)*MAP_WIDTH+j-1] = sqrt(2);
                 }   
             }
+            droite = 0;
+            gauche = 0;
+            bas = 0;
         }
     }
     return graph;
@@ -245,19 +256,23 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
         printf("\n");
     }
     float** graph = mapToGraph(map);
-    int tileWidth = 1920 / MAP_WIDTH;
-    int tileHeight = 1080 / MAP_HEIGHT;
+    int tileWidth = 1920 / (MAP_WIDTH+2);
+    int tileHeight = 1080 / (MAP_HEIGHT+2);
     int zombieTileX = (int)(zombie->x / tileWidth);
     int zombieTileY = (int)(zombie->y / tileHeight);
+    printf("Zombie: %d, %d\n", zombieTileX, zombieTileY);
     int zombieSommet = zombieTileY * MAP_WIDTH + zombieTileX;
-    printf("On est en %d.\n"), zombieSommet;
+    zombie->currentVertex = zombieSommet;
     int characterTileX = (int)(character->x / tileWidth);
     int characterTileY = (int)(character->y / tileHeight);
+    printf("Character: %d, %d\n", characterTileX, characterTileY);
     int characterSommet = characterTileY * MAP_WIDTH + characterTileX;
-    int nextSommet = dijkstra(graph, zombieSommet, characterSommet);
-    printf("On doit aller en %d.\n", nextSommet);
-    zombie->nextX = ((nextSommet / MAP_WIDTH)+1)*tileHeight; // il y a un +1 pour le mur du haut
-    zombie->nextY = ((nextSommet % MAP_WIDTH)+1)*tileWidth; // il y a un +1 pour le mur de gauche
+    if (zombieSommet != characterSommet)
+    {
+        int nextVertex = dijkstra(graph, zombieSommet, characterSommet);
+        zombie->nextVertex = nextVertex;   
+    }
+    printf("Zombie: %d, Character: %d\n", zombieSommet, characterSommet);
 
     // FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE
     for (int i = 0; i < MAP_HEIGHT+2; i++)

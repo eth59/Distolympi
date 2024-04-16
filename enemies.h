@@ -9,8 +9,8 @@ typedef struct {
     int y;
     int width; // largeur pour le rendu
     int height; // hauteur pour le rendu
-    int nextX; // Coordonnées vers laquelle le zombie va se déplacer
-    int nextY; // Coordonnées vers laquelle le zombie va se déplacer
+    int currentVertex;
+    int nextVertex;
     float speed;
     int direction; // Pour l'animation
     int animation_frame; // Pour l'animation, l'étape du cycle d'animation

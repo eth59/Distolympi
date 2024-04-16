@@ -125,13 +125,13 @@ int get_melee_direction(int charX, int charY, int mouseX, int mouseY) {
     
     // Si l'angle est négatif, le convertir en un angle positif entre 0 et 2*PI
     if (angle < 0) {
-        angle += 2 * M_PI;
+        angle += 2 * PI;
     }
 
     // Convertir l'angle en un index de direction (de 0 à 8)
     // On divise le cercle en 8 secteurs de 45 degrés chacun
     // Chaque secteur est associé à un entier de 0 à 7, donc on multiplie l'angle par 4/pi et on arrondit au plus proche
-    int direction = (int)(angle * 4 / M_PI + 0.5);
+    int direction = (int)(angle * 4 / PI + 0.5);
     
 
     // Pour éviter que direction dépasse 8, on prend son modulo 8
