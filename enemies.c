@@ -19,7 +19,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->height = 130;
     (*zombie)->currentVertex = 0;
     (*zombie)->nextVertex = 0;
-    (*zombie)->speed = 1;
+    (*zombie)->speed = .5;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
     (*zombie)->delay_frame = 0;
@@ -41,9 +41,9 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
 
 void move_zombie(Enemy **zombie)
 {
+        // Convertion de l'angle en une direction + déplacement du zombie
     if ((*zombie)->currentVertex != (*zombie)->nextVertex) {
         int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
-        // Convertion de l'angle en une direction + déplacement du zombie
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élevée
         if (diff == 1) {
@@ -294,6 +294,7 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
     if (zombieSommet != characterSommet)
     {
         int nextVertex = dijkstra(graph, zombieSommet, characterSommet);
+        printf("Prochain sommet : %d\n", nextVertex);
         zombie->nextVertex = nextVertex;   
     }
 

@@ -5,8 +5,8 @@
 
 // Structure pour les ennemis
 typedef struct {
-    int x;
-    int y;
+    float x;
+    float y;
     int width; // largeur pour le rendu
     int height; // hauteur pour le rendu
     int currentVertex;
