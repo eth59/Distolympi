@@ -95,6 +95,7 @@ int main() {
             .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36,
             .attack_speed = 0.5,
             .health = 100,
+            .max_health = 100,
             .attack_damage = 10,
             .inventory = {0}
         };
@@ -340,6 +341,9 @@ int main() {
             
             // Dessin de l'inventaire
             draw_inventory_bar(renderer, character, inventoryTexture, items);
+
+            // Dessin de la barre de vie
+            draw_health_bar(renderer, SCREEN_WIDTH-450, 10, character.health, character.max_health);
 
             SDL_RenderPresent(renderer);
             

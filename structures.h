@@ -33,6 +33,7 @@ typedef struct {
     float attack_speed;
     int attack_damage;
     int health;
+    int max_health;
     Inventory inventory;
 } Character;
 

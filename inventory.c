@@ -58,3 +58,25 @@ void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture
         slotRect.x += 200;
     }
 }
+
+void draw_health_bar(SDL_Renderer* renderer, int x, int y, int current_health, int max_health) {
+    // Dessiner le rectangle vide de la barre de vie
+    SDL_Rect health_bar_rect = { x, y, 400, 40 };
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderDrawRect(renderer, &health_bar_rect);
+
+    // Calculer la largeur du rectangle de santé actuel
+    int health_width = (current_health * 400) / max_health;
+    if (health_width < 0) {
+        health_width = 0;
+    }
+
+    // Dessiner le rectangle plein de la santé actuelle
+    SDL_Rect health_rect = { x, y, health_width, 40 };
+    if (current_health <= 25) {
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // rouge si la santé est inférieure ou égale à 25
+    } else {
+        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // vert sinon
+    }
+    SDL_RenderFillRect(renderer, &health_rect);
+}
