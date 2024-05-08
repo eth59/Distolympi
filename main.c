@@ -37,7 +37,7 @@ int main() {
         exit(-1);
     }
 
-    SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
+    // SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 
     // Initialisation du renderer
     SDL_Renderer *renderer;
@@ -250,8 +250,8 @@ int main() {
             pathfinding(zombie, &character, collisionTableFileName);
             move_zombie(&zombie);
 
-                // rendu graphique
-                SDL_RenderClear(renderer);
+            // rendu graphique
+            SDL_RenderClear(renderer);
 
             int max_column_frame = 8;
             int max_line_frame = 10;

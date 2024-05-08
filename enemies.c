@@ -19,7 +19,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->height = 130;
     (*zombie)->currentVertex = 0;
     (*zombie)->nextVertex = 0;
-    (*zombie)->speed = 1.5;
+    (*zombie)->speed = 1;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
     (*zombie)->delay_frame = 0;
