@@ -154,7 +154,7 @@ int main() {
         while (playing) {
             startTime = SDL_GetTicks();
 
-            if (SDL_PollEvent(&event)) {
+            while (SDL_PollEvent(&event)) {
                 switch (event.type) {
                     case SDL_QUIT:
                         // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
