@@ -37,6 +37,8 @@ int main() {
         exit(-1);
     }
 
+    SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
+
     // Initialisation du renderer
     SDL_Renderer *renderer;
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -343,7 +345,7 @@ int main() {
             draw_inventory_bar(renderer, character, inventoryTexture, items);
 
             // Dessin de la barre de vie
-            draw_health_bar(renderer, SCREEN_WIDTH-450, 10, character.health, character.max_health);
+            draw_health_bar(renderer, SCREEN_WIDTH-820, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, character.health, character.max_health);
 
             SDL_RenderPresent(renderer);
             
