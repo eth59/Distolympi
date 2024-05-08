@@ -35,3 +35,9 @@ typedef struct {
     int health;
     Inventory inventory;
 } Character;
+
+// Structure pour caractériser une texture
+typedef struct {
+    SDL_Texture* texture;
+    int type;
+} Item;

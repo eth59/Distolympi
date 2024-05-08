@@ -9,6 +9,8 @@
 #include "enemies.h"
 #include "inventory.h"
 
+#define MAX_ITEM_TYPES 3
+
 
 int main() {
     Uint32 startTime, endTime, deltaTime;
@@ -42,7 +44,17 @@ int main() {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in renderer init: %s", SDL_GetError());
         exit(-1);
     }
+
     SDL_Texture*  dead_zombie_texture = get_texture("assets/dead_zombie.png",renderer);
+
+    // Initialisation de l'inventaire
+    Item* items = malloc(MAX_ITEM_TYPES * sizeof(Item));
+    if (items == NULL) {
+        printf("Erreur d'allocation de mémoire pour items\n");
+        exit(1);
+    }
+    load_item_textures(renderer, items);
+
     int running = 1;
     while(running){
         // selection aléatoire du fond d'écran
@@ -118,8 +130,7 @@ int main() {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading inventory texture: %s", SDL_GetError());
             exit(-1);
         }
-
-        // Boucle principale
+        
         SDL_Event event;
         int playing = 1;
 
@@ -328,7 +339,7 @@ int main() {
             SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
             
             // Dessin de l'inventaire
-            draw_inventory_bar(renderer, character, inventoryTexture);
+            draw_inventory_bar(renderer, character, inventoryTexture, items);
 
             SDL_RenderPresent(renderer);
             
@@ -373,12 +384,16 @@ int main() {
         SDL_DestroyTexture(cheeseTexture);
         SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
+        for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+            SDL_DestroyTexture(items[i].texture);
+        }
 
         free(characterRectsrc);
         free(attacksRectsrc);
         free(collisionTable);
         free(zombieRectSrc);
         free(zombie);
+        free(items);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
