@@ -262,7 +262,7 @@ int main() {
 
             if(zombie->health>0){
                 // Actions mobs & gestion interaction
-                move_zombie(&zombie, &character);
+                move_zombie(&zombie);
                 // Rendu du zombie
                 render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
             }
