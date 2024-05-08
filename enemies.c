@@ -25,7 +25,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->delay_frame = 0;
     (*zombie)->max_column_frame = 8;
     (*zombie)->max_line_frame = 10;
-    (*zombie)->attack_damage = 5;
+    (*zombie)->attack_damage = 10;
     (*zombie)->health = 30;
     
     // On divise le tileset du zombie
@@ -215,7 +215,7 @@ int dijkstra(float **graph, int src, int dest)
     }
     dist[src] = 0; // La seule valeur qu'on connaît
     int vu[V] = {0}; // Pour savoir les sommets qu'on a déjà vu
-    int pred[V]; // Tableau avec les prédécesseurs dans le parcours
+    int pred[V] = {-1}; // Tableau avec les prédécesseurs dans le parcours
 
     // boucle principale de dijkstra
     for (int i = 0; i < V-1; i++)
@@ -235,12 +235,44 @@ int dijkstra(float **graph, int src, int dest)
         }
     }
     int u = dest;
+    if (u == src)
+    {
+        return u;
+    }
+    printf("u : %d\n", u);
+    printf("pred : %d\n", pred[u]);
     while (pred[u] != src)
     {
         u = pred[u];
     }
     return u; // on retourne la prochaine tile sur laquelle le zombie doit aller
 } 
+
+// Calcul du sommet à partir de la position
+int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
+    int tileWidth = 1920 / (MAP_WIDTH+2);
+    int tileHeight = 1080 / (MAP_HEIGHT+3);
+    printf("tile : %d %d\n", tileWidth, tileHeight);
+    int tileX = (x + hitboxWidth/2) / tileWidth - 1;
+    int tileY = (y + hitboxHeight/2) / tileHeight - 1;
+    // Correction à cause de dépassement dans le mur
+    if (tileX < 0)
+    {
+        tileX = 0;
+    } else if (tileX > MAP_WIDTH-1)
+    {
+        tileX = MAP_WIDTH-1;
+    }
+    if (tileY < 0)
+    {
+        tileY = 0;
+    } else if (tileY > MAP_HEIGHT-1)
+    {
+        tileY = MAP_HEIGHT-1;
+    }
+    printf("sommet : %d pour %d %d\n", tileY*MAP_WIDTH+tileX, x + hitboxWidth/2, y + hitboxHeight/2);
+    return tileY * MAP_WIDTH + tileX;
+}
 
 // Pathfinding
 void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileName)
@@ -256,23 +288,14 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
         printf("\n");
     }
     float** graph = mapToGraph(map);
-    int tileWidth = 1920 / (MAP_WIDTH+2);
-    int tileHeight = 1080 / (MAP_HEIGHT+2);
-    int zombieTileX = (int)(zombie->x / tileWidth);
-    int zombieTileY = (int)(zombie->y / tileHeight);
-    printf("Zombie: %d, %d\n", zombieTileX, zombieTileY);
-    int zombieSommet = zombieTileY * MAP_WIDTH + zombieTileX;
+    int zombieSommet = get_sommet(zombie->x, zombie->y, zombie->width, zombie->height);
     zombie->currentVertex = zombieSommet;
-    int characterTileX = (int)(character->x / tileWidth);
-    int characterTileY = (int)(character->y / tileHeight);
-    printf("Character: %d, %d\n", characterTileX, characterTileY);
-    int characterSommet = characterTileY * MAP_WIDTH + characterTileX;
+    int characterSommet = get_sommet(character->x, character->y, character->width, character->height);
     if (zombieSommet != characterSommet)
     {
         int nextVertex = dijkstra(graph, zombieSommet, characterSommet);
         zombie->nextVertex = nextVertex;   
     }
-    printf("Zombie: %d, Character: %d\n", zombieSommet, characterSommet);
 
     // FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE FREE
     for (int i = 0; i < MAP_HEIGHT+2; i++)
