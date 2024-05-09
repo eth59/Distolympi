@@ -416,6 +416,8 @@ int main() {
         free(zombie);
         free(collisionTableFileName);
         free(items);
+        free(mapHoles);
+        free(tabMapHoles);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
