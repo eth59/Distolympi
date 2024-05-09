@@ -295,7 +295,7 @@ int dijkstra(float **graph, int src, int dest)
     {
         return u;
     }
-    while (pred[u] != src)
+    while (pred[u] != src && pred[u] != -1)
     {
         u = pred[u];
     }
