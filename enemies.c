@@ -6,15 +6,15 @@
 #include "structures.h"
 #include "enemies.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc)
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int xcoord, int ycoord)
 {
     // Chargement de la texture
     *zombieTexture = get_texture("assets/zombie.png", renderer);
 
     // Création de l'objet
     *zombie = malloc(sizeof(Enemy));
-    (*zombie)->x = 100;
-    (*zombie)->y = 100;
+    (*zombie)->x = xcoord;
+    (*zombie)->y = ycoord;
     (*zombie)->width = 130;
     (*zombie)->height = 130;
     (*zombie)->currentVertex = 0;
