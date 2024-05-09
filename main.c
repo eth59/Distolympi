@@ -67,6 +67,11 @@ int main() {
         char *collisionTableFileName = getColliderTable(index);
         char *collisionTable = openCollisionFile(collisionTableFileName);
 
+        // on récupère le fichier qui contient les tiles libres 
+        char *mapHoles = getMapHoles(index);
+        int tailleMapHoles;
+        int *tabMapHoles = convertirFichierEnTableau(mapHoles, &tailleMapHoles);
+
 
         // charger fond d'écran
         SDL_Texture *backgroundTexture = get_texture(map, renderer);
