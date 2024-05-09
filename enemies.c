@@ -6,15 +6,15 @@
 #include "structures.h"
 #include "enemies.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int xcoord, int ycoord)
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc)
 {
     // Chargement de la texture
     *zombieTexture = get_texture("assets/zombie.png", renderer);
 
     // Création de l'objet
     *zombie = malloc(sizeof(Enemy));
-    (*zombie)->x = xcoord;
-    (*zombie)->y = ycoord;
+    (*zombie)->x = 100;
+    (*zombie)->y = 100;
     (*zombie)->width = 130;
     (*zombie)->height = 130;
     (*zombie)->currentVertex = 0;
@@ -295,7 +295,7 @@ int dijkstra(float **graph, int src, int dest)
     {
         return u;
     }
-    while (pred[u] != src && pred[u] != -1)
+    while (pred[u] != src)
     {
         u = pred[u];
     }
