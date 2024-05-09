@@ -75,14 +75,14 @@ int main() {
         free(map);
         // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pr le zombie
 
-// Charger la texture des attaques *************************************************************************
+        // Charger la texture des attaques
         SDL_Texture *attacksTexture = get_texture("assets/Attaquesx.png",renderer);
         // On divise la tileset du character 
         int attacks_max_column_frame=5;
         int attacks_max_line_frame=8;
         SDL_Rect* attacksRectsrc=get_frames(32,32,attacks_max_line_frame,attacks_max_column_frame);
 
-// Charger la texture du personnage ************************************************************************
+        // Charger la texture du personnage
         SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
         // Initialisation du personnage
         Character character = {
@@ -107,7 +107,7 @@ int main() {
         SDL_Rect* characterRectsrc=get_frames(32,32,character_max_line_frame,character_max_column_frame);
 
         
-// Initialisation d'un 1er objet : un fromage***************************************************************
+        // Initialisation d'un 1er objet : un fromage
         Object cheese = {
             .x = 50,
             .y = 50,
@@ -120,13 +120,12 @@ int main() {
         // Charger la texture du fromage
         SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
-// Initialisation du zombie ********************************************************************************
+        // Initialisation du zombie
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
         init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
 
-// Boucle principale****************************************************************************************
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
         if (!inventoryTexture) {
@@ -246,10 +245,6 @@ int main() {
                 direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
             }
 
-            // Actions mobs & gestion interaction
-            pathfinding(zombie, &character, collisionTableFileName);
-            move_zombie(&zombie);
-
             // rendu graphique
             SDL_RenderClear(renderer);
 
@@ -262,7 +257,8 @@ int main() {
 
             if(zombie->health>0){
                 // Actions mobs & gestion interaction
-                move_zombie(&zombie);
+                pathfinding(zombie, &character, collisionTableFileName);
+                move_zombie(&zombie, &character);
                 // Rendu du zombie
                 render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
             }
@@ -292,8 +288,8 @@ int main() {
                             zombie->health = zombie->health - character.attack_damage;
                             printf("HIT! Zombie's life is now %d\n",zombie->health);
                     }
-                    }
-                    }
+                }
+            }
                 
             
             //Rendu character + animation 
@@ -312,11 +308,14 @@ int main() {
 
             if (SDL_HasIntersection(&zombieHitboxRect, &characterHitboxRect) && zombie->health>0) {
                 // Collision détectée
+                zombie->isInsidePlayer = 1;
                 if (SDL_GetTicks()-last_zombie_hit>=500){
                     last_zombie_hit = SDL_GetTicks();
                     character.health = character.health - zombie->attack_damage;
                     printf("HIT! Loli's life is now %d\n",character.health);
                 }
+            } else {
+                zombie->isInsidePlayer = 0;
             }
 
             // Rendu du fromage

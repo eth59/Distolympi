@@ -19,7 +19,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->height = 130;
     (*zombie)->currentVertex = 0;
     (*zombie)->nextVertex = 0;
-    (*zombie)->speed = .5;
+    (*zombie)->speed = 1.5;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
     (*zombie)->delay_frame = 0;
@@ -27,6 +27,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->max_line_frame = 10;
     (*zombie)->attack_damage = 10;
     (*zombie)->health = 30;
+    (*zombie)->isInsidePlayer = 0;
     
     // On divise le tileset du zombie
     *zombieRectSrc = get_frames(32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
@@ -39,14 +40,69 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
     SDL_RenderCopy(renderer, zombieTexture, &zombieRectSrc[sprite_nb], &zombieRectDest);
 }
 
-void move_zombie(Enemy **zombie)
+void move_zombie(Enemy **zombie, Character *player)
 {
-        // Convertion de l'angle en une direction + déplacement du zombie
-    if ((*zombie)->currentVertex != (*zombie)->nextVertex) {
+    if (!(*zombie)->isInsidePlayer) {
         int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élevée
-        if (diff == 1) {
+        if (diff == 0) {
+            // Sur la même case que le joueur
+            int diff_x = player->x - (*zombie)->x;
+            int diff_y = player->y - (*zombie)->y;
+            double angle = atan2(diff_y, diff_x);
+            int index = (int)round(angle / (PI / 4));
+            if (index < 0) {
+                index += 8;
+            }
+            switch (index)
+            {
+            case 0:
+                // Haut
+                (*zombie)->direction = 6;
+                (*zombie)->y -= (*zombie)->speed;
+                break;
+            case 1:
+                // Haut droite
+                (*zombie)->direction = 7;
+                (*zombie)->x += (*zombie)->speed*0.7071f;
+                (*zombie)->y -= (*zombie)->speed*0.7071f;
+                break;
+            case 2:
+                // Droite
+                (*zombie)->direction = 8;
+                (*zombie)->x += (*zombie)->speed;
+                break;
+            case 3:
+                // Bas droite
+                (*zombie)->direction = 9;
+                (*zombie)->x += (*zombie)->speed*0.7071f;
+                (*zombie)->y += (*zombie)->speed*0.7071f;
+                break;
+            case 4:
+                // Bas
+                (*zombie)->direction = 2;
+                (*zombie)->y += (*zombie)->speed;
+                break;
+            case 5:
+                // Bas gauche
+                (*zombie)->direction = 3;
+                (*zombie)->x -= (*zombie)->speed*0.7071f;
+                (*zombie)->y += (*zombie)->speed*0.7071f;
+                break;
+            case 6:
+                // Gauche
+                (*zombie)->direction = 4;
+                (*zombie)->x -= (*zombie)->speed;
+                break;
+            case 7:
+                // Haut gauche
+                (*zombie)->direction = 5;
+                (*zombie)->x -= (*zombie)->speed*0.7071f;
+                (*zombie)->y -= (*zombie)->speed*0.7071f;
+                break;
+            }
+        } else if (diff == 1) {
             // Droite
             (*zombie)->direction = 8;
             (*zombie)->x += (*zombie)->speed;
@@ -83,15 +139,15 @@ void move_zombie(Enemy **zombie)
             (*zombie)->x += (*zombie)->speed*0.7071f;
             (*zombie)->y -= (*zombie)->speed*0.7071f;
         }
-    }
 
-    // On met à jour les paramètres de l'animation
-    if ((*zombie)->delay_frame > 20 / (*zombie)->speed)
-    {
-        (*zombie)->animation_frame = ((*zombie)->animation_frame + 1) % (*zombie)->max_column_frame;
-        (*zombie)->delay_frame = 0;
+        // On met à jour les paramètres de l'animation
+        if ((*zombie)->delay_frame > 20 / (*zombie)->speed)
+        {
+            (*zombie)->animation_frame = ((*zombie)->animation_frame + 1) % (*zombie)->max_column_frame;
+            (*zombie)->delay_frame = 0;
+        }
+        (*zombie)->delay_frame++;
     }
-    (*zombie)->delay_frame++;
 }
 
 // Pour lire le fichier de collision et en faire une matrice
@@ -239,8 +295,6 @@ int dijkstra(float **graph, int src, int dest)
     {
         return u;
     }
-    printf("u : %d\n", u);
-    printf("pred : %d\n", pred[u]);
     while (pred[u] != src)
     {
         u = pred[u];
@@ -252,7 +306,6 @@ int dijkstra(float **graph, int src, int dest)
 int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
     int tileWidth = 1920 / (MAP_WIDTH+2);
     int tileHeight = 1080 / (MAP_HEIGHT+3);
-    printf("tile : %d %d\n", tileWidth, tileHeight);
     int tileX = (x + hitboxWidth/2) / tileWidth - 1;
     int tileY = (y + hitboxHeight/2) / tileHeight - 1;
     // Correction à cause de dépassement dans le mur
@@ -270,7 +323,6 @@ int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
     {
         tileY = MAP_HEIGHT-1;
     }
-    printf("sommet : %d pour %d %d\n", tileY*MAP_WIDTH+tileX, x + hitboxWidth/2, y + hitboxHeight/2);
     return tileY * MAP_WIDTH + tileX;
 }
 
@@ -279,14 +331,6 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
 {
     printf("%s\n", collisionTableFileName);
     int** map = readMapCollisionFile(collisionTableFileName);
-    for (int i = 0; i < MAP_HEIGHT+2; i++)
-    {
-        for (int j = 0; j < MAP_WIDTH+2; j++)
-        {
-            printf("%d ", map[i][j]);
-        }
-        printf("\n");
-    }
     float** graph = mapToGraph(map);
     int zombieSommet = get_sommet(zombie->x, zombie->y, zombie->width, zombie->height);
     zombie->currentVertex = zombieSommet;
@@ -294,7 +338,6 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
     if (zombieSommet != characterSommet)
     {
         int nextVertex = dijkstra(graph, zombieSommet, characterSommet);
-        printf("Prochain sommet : %d\n", nextVertex);
         zombie->nextVertex = nextVertex;   
     }
 
