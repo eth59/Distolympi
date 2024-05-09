@@ -124,7 +124,14 @@ int main() {
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
+        int indexHole = randomInt(tailleMapHoles);
+        int tileNumber = tabMapHoles[indexHole];
+        int xCoord;
+        int yCoord;        
+        getCoordFromTiles(tileNumber, &xCoord, &yCoord);
+        xCoord = xCoord*(SCREEN_WIDTH/16);
+        yCoord = yCoord*(SCREEN_HEIGHT/9);
+        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, xCoord, yCoord);
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
