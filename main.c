@@ -67,11 +67,6 @@ int main() {
         char *collisionTableFileName = getColliderTable(index);
         char *collisionTable = openCollisionFile(collisionTableFileName);
 
-        // on récupère le fichier qui contient les tiles libres 
-        char *mapHoles = getMapHoles(index);
-        int tailleMapHoles;
-        int *tabMapHoles = convertirFichierEnTableau(mapHoles, &tailleMapHoles);
-
 
         // charger fond d'écran
         SDL_Texture *backgroundTexture = get_texture(map, renderer);
@@ -129,14 +124,7 @@ int main() {
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        int indexHole = randomInt(tailleMapHoles);
-        int tileNumber = tabMapHoles[indexHole];
-        int xCoord;
-        int yCoord;        
-        getCoordFromTiles(tileNumber, &xCoord, &yCoord);
-        xCoord = xCoord*(SCREEN_WIDTH/16);
-        yCoord = yCoord*(SCREEN_HEIGHT/9);
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, xCoord, yCoord);
+        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
@@ -416,8 +404,6 @@ int main() {
         free(zombie);
         free(collisionTableFileName);
         free(items);
-        free(mapHoles);
-        free(tabMapHoles);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
