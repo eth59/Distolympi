@@ -329,7 +329,6 @@ int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
 // Pathfinding
 void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileName)
 {
-    printf("%s\n", collisionTableFileName);
     int** map = readMapCollisionFile(collisionTableFileName);
     float** graph = mapToGraph(map);
     int zombieSommet = get_sommet(zombie->x, zombie->y, zombie->width, zombie->height);
