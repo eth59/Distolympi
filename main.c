@@ -393,9 +393,6 @@ int main() {
         SDL_DestroyTexture(cheeseTexture);
         SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
-        for (int i = 0; i < MAX_ITEM_TYPES; i++) {
-            SDL_DestroyTexture(items[i].texture);
-        }
 
         free(characterRectsrc);
         free(attacksRectsrc);

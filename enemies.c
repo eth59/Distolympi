@@ -43,7 +43,6 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
 void move_zombie(Enemy **zombie, Character *player)
 {
     if (!(*zombie)->isInsidePlayer) {
-        printf("Zombie en %d et va en %d donc diff de %d\n", (*zombie)->currentVertex, (*zombie)->nextVertex, (*zombie)->nextVertex - (*zombie)->currentVertex);
         int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élevée
@@ -59,53 +58,45 @@ void move_zombie(Enemy **zombie, Character *player)
             switch (index)
             {
             case 6:
-                printf("vers le haut\n");
                 // Haut
                 (*zombie)->direction = 6;
                 (*zombie)->y -= (*zombie)->speed;
                 break;
             case 7:
                 // Haut droite
-                printf("vers le haut droite\n");
                 (*zombie)->direction = 7;
                 (*zombie)->x += (*zombie)->speed*0.7071f;
                 (*zombie)->y -= (*zombie)->speed*0.7071f;
                 break;
             case 0:
                 // Droite
-                printf("vers la droite\n");
                 (*zombie)->direction = 8;
                 (*zombie)->x += (*zombie)->speed;
                 break;
             case 1:
                 // Bas droite
-                printf("vers le bas droite\n");
                 (*zombie)->direction = 9;
                 (*zombie)->x += (*zombie)->speed*0.7071f;
                 (*zombie)->y += (*zombie)->speed*0.7071f;
                 break;
             case 2:
                 // Bas
-                printf("vers le bas\n");
                 (*zombie)->direction = 2;
                 (*zombie)->y += (*zombie)->speed;
                 break;
             case 3:
                 // Bas gauche
-                printf("vers le bas gauche\n");
                 (*zombie)->direction = 3;
                 (*zombie)->x -= (*zombie)->speed*0.7071f;
                 (*zombie)->y += (*zombie)->speed*0.7071f;
                 break;
             case 4:
                 // Gauche
-                printf("vers la gauche\n");
                 (*zombie)->direction = 4;
                 (*zombie)->x -= (*zombie)->speed;
                 break;
             case 5:
                 // Haut gauche
-                printf("vers le haut gauche\n");
                 (*zombie)->direction = 5;
                 (*zombie)->x -= (*zombie)->speed*0.7071f;
                 (*zombie)->y -= (*zombie)->speed*0.7071f;
@@ -273,7 +264,6 @@ int minDistance(float dist[], int vu[])
 // Dijkstra
 int dijkstra(float **graph, int src, int dest)
 {
-    printf("Sommet du zombie : %d, du perso : %d\n", src, dest);
     float dist[V]; // Le tableau où on va stocker les distances à la src
     for (int i = 0; i < V; i++)
     {
