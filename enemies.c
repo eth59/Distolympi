@@ -295,7 +295,7 @@ int dijkstra(float **graph, int src, int dest)
     {
         return u;
     }
-    while (pred[u] != src)
+    while (pred[u] != src && pred[u] != -1)
     {
         u = pred[u];
     }
@@ -307,7 +307,7 @@ int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
     int tileWidth = 1920 / (MAP_WIDTH+2);
     int tileHeight = 1080 / (MAP_HEIGHT+3);
     int tileX = (x + hitboxWidth/2) / tileWidth - 1;
-    int tileY = (y + hitboxHeight/2) / tileHeight - 1;
+    int tileY = (y + hitboxHeight) / tileHeight - 1;
     // Correction à cause de dépassement dans le mur
     if (tileX < 0)
     {
