@@ -400,6 +400,7 @@ int main() {
                 SDL_DestroyTexture(characterTexture);
                 if(SDL_GetTicks()-death_time>3000){
                     playing = 0;
+                    in_menu = 1;
                 }
             }
             else if(zombie->health <= 0 ){
@@ -441,6 +442,11 @@ int main() {
                             case SDL_KEYDOWN:
                                 switch (event.key.keysym.sym) {
                                     case SDLK_ESCAPE:
+                                        game_in_pause = 0;
+                                        playing = 0;
+                                        in_menu = 1;
+                                        break;
+                                    case SDLK_SPACE:
                                         game_in_pause = 0;
                                         break;
                                 }
