@@ -191,6 +191,9 @@ int main() {
                                 key_up_pressed = 0;
                                 key_down_pressed = 0;
                                 break;
+                            case SDLK_r:
+                                playing = 0;
+                                break;
                             case SDLK_e:
                                 // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
                                 if (!cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
