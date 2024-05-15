@@ -94,26 +94,67 @@ int get_direction_and_move(int key_up_pressed ,int key_down_pressed,int key_left
 }
 
 
-SDL_Rect get_Rectdest_attacks(int destination,Character character){
+SDL_Rect get_Rectdest_attacks(int destination, Character character) {
     SDL_Rect Rectdest;
-    if(destination==0)
-        {SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y+(int)character.height, (int)character.width*1.5, (int)character.height};}
-    else if(destination==1)
-        {SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
-    else if(destination==2)
-        {SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y-(int)character.height/4, (int)character.width, (int)character.height*1.5};}
-    else if(destination==3)
-        {SDL_Rect Rectdest = {(int)character.x-(int)character.width, (int)character.y-(int)character.height, (int)character.width, (int)character.height};}
-    else if(destination==4)
-        {SDL_Rect Rectdest = {(int)character.x-(int)character.width/4, (int)character.y-(int)character.height, (int)character.width*1.5, (int)character.height};}
-    else if(destination==5)
-        {SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y-(int)character.height, (int)character.width, (int)character.height};}
-    else if(destination==6)
-        {SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y-(int)character.height/4, (int)character.width, (int)character.height*1.5};}
-    else if(destination==7)
-        {SDL_Rect Rectdest = {(int)character.x+(int)character.width, (int)character.y+(int)character.height, (int)character.width, (int)character.height};}
+
+    // Initialisation des valeurs par défaut
+    Rectdest.x = 0;
+    Rectdest.y = 0;
+    Rectdest.w = 0;
+    Rectdest.h = 0;
+
+    // Calcul du Rectdest en fonction de la destination
+    if (destination == 0) {
+        Rectdest.x = (int)character.x - (int)character.width / 4;
+        Rectdest.y = (int)character.y + (int)character.height;
+        Rectdest.w = (int)character.width * 1.5;
+        Rectdest.h = (int)character.height;
+    }
+    else if (destination == 1) {
+        Rectdest.x = (int)character.x - (int)character.width;
+        Rectdest.y = (int)character.y + (int)character.height;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height;
+    }
+    else if (destination == 2) {
+        Rectdest.x = (int)character.x - (int)character.width;
+        Rectdest.y = (int)character.y - (int)character.height / 4;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height * 1.5;
+    }
+    else if (destination == 3) {
+        Rectdest.x = (int)character.x - (int)character.width;
+        Rectdest.y = (int)character.y - (int)character.height;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height;
+    }
+    else if (destination == 4) {
+        Rectdest.x = (int)character.x - (int)character.width / 4;
+        Rectdest.y = (int)character.y - (int)character.height;
+        Rectdest.w = (int)character.width * 1.5;
+        Rectdest.h = (int)character.height;
+    }
+    else if (destination == 5) {
+        Rectdest.x = (int)character.x + (int)character.width;
+        Rectdest.y = (int)character.y - (int)character.height;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height;
+    }
+    else if (destination == 6) {
+        Rectdest.x = (int)character.x + (int)character.width;
+        Rectdest.y = (int)character.y - (int)character.height / 4;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height * 1.5;
+    }
+    else if (destination == 7) {
+        Rectdest.x = (int)character.x + (int)character.width;
+        Rectdest.y = (int)character.y + (int)character.height;
+        Rectdest.w = (int)character.width;
+        Rectdest.h = (int)character.height;
+    }
     return Rectdest;
 }
+
 
 int get_melee_direction(int charX, int charY, int mouseX, int mouseY) {
     // Calcul des coordonnées relatives de la souris par rapport au personnage

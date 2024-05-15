@@ -37,7 +37,7 @@ int main() {
         exit(-1);
     }
 
-    SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
+    //SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 
     // Initialisation du renderer
     SDL_Renderer *renderer;
@@ -49,16 +49,16 @@ int main() {
 
     SDL_Texture*  dead_zombie_texture = get_texture("assets/dead_zombie.png",renderer);
 
-    // Initialisation de l'inventaire
-    Item* items = malloc(MAX_ITEM_TYPES * sizeof(Item));
-    if (items == NULL) {
-        printf("Erreur d'allocation de mémoire pour items\n");
-        exit(1);
-    }
-    load_item_textures(renderer, items);
 
     int running = 1;
     while(running){
+        // Initialisation de l'inventaire
+        Item* items = malloc(MAX_ITEM_TYPES * sizeof(Item));
+        if (items == NULL) {
+            printf("Erreur d'allocation de mémoire pour items\n");
+            exit(1);
+        }
+        load_item_textures(renderer, items);
         // selection aléatoire du fond d'écran
         int index = randomMapIndex();
         char *map = getMapFromIndex(index);
@@ -135,7 +135,8 @@ int main() {
         
         SDL_Event event;
         int playing = 1;
-
+        // Déclaration de variables pour suivre le temps de mort
+        int death_time = 0;
         // Déclaration de variables pour suivre l'état des touches
         int key_up_pressed = 0;
         int key_down_pressed = 0;
@@ -268,18 +269,18 @@ int main() {
             if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
                 attack_dispo = 1;
             }
+
             if ((key_space_pressed && attack_dispo) | attack_flag){
                 attack_flag = 1;
                 attack_time=SDL_GetTicks();
                 int direction_attack = get_melee_direction(character.x + character.width/2,character.y + character.height/2,mouseX,mouseY);
                 SDL_Rect attacksRectdest = get_Rectdest_attacks(direction_attack,character);
+    
                 attacks_animation_frame=attacks_animation_frame%attacks_max_column_frame;// cycle d'animation
                 SDL_RenderCopy(renderer, attacksTexture, &attacksRectsrc[(direction_attack)*attacks_max_column_frame+attacks_animation_frame], &attacksRectdest);
-                
                 if(attacks_delay_frame>5){
                         attacks_animation_frame++;
-                        attacks_delay_frame=0;}     
-                attacks_delay_frame++;
+                        attacks_delay_frame=0;}    
                 if(attacks_animation_frame>4){
                     attack_dispo = 0;
                     attack_flag = 0;
@@ -289,6 +290,7 @@ int main() {
                             printf("HIT! Zombie's life is now %d\n",zombie->health);
                     }
                 }
+                attacks_delay_frame++;
             }
                 
             
@@ -306,7 +308,7 @@ int main() {
             }
             character_delay_frame++;
 
-            if (SDL_HasIntersection(&zombieHitboxRect, &characterHitboxRect) && zombie->health>0) {
+            if (SDL_HasIntersection(&zombieHitboxRect, &characterHitboxRect) && zombie->health>0 && character.health>0) {
                 // Collision détectée
                 zombie->isInsidePlayer = 1;
                 if (SDL_GetTicks()-last_zombie_hit>=500){
@@ -332,9 +334,15 @@ int main() {
             }
 
             if(character.health<=0){
+                if(death_time==0){
+                    death_time = SDL_GetTicks();
+                }
                 SDL_Texture* death_menu_texture=get_texture("assets/Wasted.png",renderer);
                 SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
                 SDL_DestroyTexture(characterTexture);
+                if(SDL_GetTicks()-death_time>3000){
+                    playing = 0;
+                }
             }
             else if(zombie->health <= 0 ){
                 zombie->speed = 0;
@@ -385,8 +393,7 @@ int main() {
         }
         
         // Libérer la mémoire et quitter SDL
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
+
 
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
