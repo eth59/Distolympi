@@ -51,7 +51,63 @@ int main() {
 
 
     int running = 1;
+    int in_menu = 1;
+    int in_settings = 0;
     while(running){
+        int playing = 1;
+        while(in_menu){
+            while(in_settings){
+                SDL_Event event;
+                SDL_Texture* settings_texture = get_texture("assets/Settings.png",renderer);
+                SDL_RenderCopy(renderer,settings_texture,NULL,NULL);
+                SDL_RenderPresent(renderer);
+                while (SDL_PollEvent(&event)) {
+                    switch (event.type) {
+                        case SDL_QUIT:
+                            // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
+                            running = 0;
+                            playing = 0;
+                            in_menu = 0;
+                            in_settings = 0;
+                            break;
+                        case SDL_KEYDOWN:
+                            switch (event.key.keysym.sym) {
+                                case SDLK_ESCAPE:
+                                    in_settings = 0;
+                                    break;
+                            }
+                            break;
+                    }
+                }
+            }
+            SDL_Event event;
+            SDL_Texture* menu_texture = get_texture("assets/Menu.png",renderer);
+            SDL_RenderCopy(renderer,menu_texture,NULL,NULL);
+            SDL_RenderPresent(renderer);
+            while (SDL_PollEvent(&event)) {
+                switch (event.type) {
+                    case SDL_QUIT:
+                        // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
+                        running = 0;
+                        in_menu = 0;
+                        playing = 0;
+                        break;
+                    case SDL_KEYDOWN:
+                        switch (event.key.keysym.sym) {
+                            case SDLK_SPACE:
+                                in_menu = 0;
+                                break;
+                            case SDLK_ESCAPE:
+                                in_settings = 1;
+                                break;
+                            case SDLK_RETURN:
+                                in_menu = 0;
+                                break;
+                        }
+                        break;
+                }
+            }
+        }
         // Initialisation de l'inventaire
         Item* items = malloc(MAX_ITEM_TYPES * sizeof(Item));
         if (items == NULL) {
@@ -134,7 +190,6 @@ int main() {
         }
         
         SDL_Event event;
-        int playing = 1;
         // Déclaration de variables pour suivre le temps de mort
         int death_time = 0;
         // Déclaration de variables pour suivre l'état des touches
