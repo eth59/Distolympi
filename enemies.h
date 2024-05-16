@@ -22,7 +22,7 @@ typedef struct {
     int isInsidePlayer; // 1 si le zombie peut attaquer le joueur, 0 sinon
 } Enemy;
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int xcoord, int ycoord);
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int tailleMapHoles, int *tabMapHoles);
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
 void move_zombie(Enemy **zombie, Character *player);
 int **readMapCollisionFile(char *fileName);

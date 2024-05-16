@@ -5,16 +5,24 @@
 #include "animations.h"
 #include "structures.h"
 #include "enemies.h"
-
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int xcoord, int ycoord)
+#include "randomSpawn.h"
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int tailleMapHoles, int *tabMapHoles)
 {
     // Chargement de la texture
     *zombieTexture = get_texture("assets/zombie.png", renderer);
 
+    int indexHole = randomInt(tailleMapHoles);
+    int tileNumber = tabMapHoles[indexHole];
+    int xCoord;
+    int yCoord;     
+    getCoordFromTiles(tileNumber, &xCoord, &yCoord);
+    xCoord = xCoord*(SCREEN_WIDTH/16);
+    yCoord = yCoord*(SCREEN_HEIGHT/9);
+
     // Création de l'objet
     *zombie = malloc(sizeof(Enemy));
-    (*zombie)->x = xcoord;
-    (*zombie)->y = ycoord;
+    (*zombie)->x = xCoord;
+    (*zombie)->y = yCoord;
     (*zombie)->width = SCREEN_WIDTH / 16;
     (*zombie)->height = SCREEN_HEIGHT / 9;
     (*zombie)->currentVertex = 0;

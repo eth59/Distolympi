@@ -125,18 +125,12 @@ int main() {
         // Charger la texture du fromage
         SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
+
         // Initialisation du zombie
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        int indexHole = randomInt(tailleMapHoles);
-        int tileNumber = tabMapHoles[indexHole];
-        int xCoord;
-        int yCoord;        
-        getCoordFromTiles(tileNumber, &xCoord, &yCoord);
-        xCoord = xCoord*(SCREEN_WIDTH/16);
-        yCoord = yCoord*(SCREEN_HEIGHT/9);
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, xCoord, yCoord);
+        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, tailleMapHoles, tabMapHoles);
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
