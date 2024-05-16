@@ -31,21 +31,85 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->delay_frame = 0;
     (*zombie)->max_column_frame = 8;
     (*zombie)->max_line_frame = 10;
-    (*zombie)->attack_damage = 5;
-    (*zombie)->health = 30;
+    (*zombie)->attack_damage = (isAShooter) ? 10 : 5;
+    (*zombie)->health = (isAShooter) ? 30 : 50;
     (*zombie)->isInsidePlayer = 0;
     (*zombie)->range = (isAShooter) ? 300 : 50;
     (*zombie)->isAShooter = isAShooter;
+    (*zombie)->medals = NULL;
     
     // On divise le tileset du zombie
     *zombieRectSrc = get_frames(32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
 }
 
+void addMedal(Enemy* zombie, Medal medal) {
+    MedalList* newMedalList = (MedalList*) malloc(sizeof(MedalList));
+    newMedalList->medal = medal;
+    newMedalList->next = zombie->medals;
+    zombie->medals = newMedalList;
+}
+
+void removeMedal(Enemy* zombie, Medal medal) {
+    MedalList* current = zombie->medals;
+    MedalList* previous = NULL;
+
+    while (current != NULL) {
+        if (current->medal.x == medal.x && current->medal.y == medal.y) {
+            if (previous == NULL) {
+                zombie->medals = current->next;
+            } else {
+                previous->next = current->next;
+            }
+            free(current);
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
+}
+
+void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer) 
+{
+    // Création de la médaille
+    Medal medal;
+    medal.x = zombie->x + zombie->width/2; // La médaille apparaît au milieu du zombie
+    medal.y = zombie->y + zombie->height/2; // La médaille apparaît au milieu du zombie
+    medal.width = 32;
+    medal.height = 32;
+    medal.speed = 2;
+    medal.angle = calculateShootingAngle(zombie, player);
+    int randomNumber = rand() % 3; // Normalement la seed est déjà initialisée quand on choisit la map mais si on l'enlève faut penser à le remettre quelque part
+    switch (randomNumber)
+    {
+    case 0:
+        medal.texture = get_texture("assets/gold_medal.png", renderer);
+        break;
+    case 1:
+        medal.texture = get_texture("assets/silver_medal.png", renderer);
+        break;
+    default:
+        medal.texture = get_texture("assets/bronze_medal.png", renderer);
+        break;
+    }
+
+    // Ajout de la médaille à la liste des médailles
+    addMedal(zombie, medal);
+}
+
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc)
 {
+    // Render du zombie
     SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
     int sprite_nb = zombie->direction * zombie->max_column_frame + zombie->animation_frame;
     SDL_RenderCopy(renderer, zombieTexture, &zombieRectSrc[sprite_nb], &zombieRectDest);
+
+    // Render des médailles
+    MedalList* current = zombie->medals;
+    while (current != NULL) {
+        SDL_Rect medalRect = {(int)current->medal.x, (int)current->medal.y, current->medal.width, current->medal.height};
+        SDL_RenderCopy(renderer, current->medal.texture, NULL, &medalRect);
+        current = current->next;
+    }
 }
 
 int zombie_is_in_range(Enemy *zombie, Character *player)
@@ -53,17 +117,67 @@ int zombie_is_in_range(Enemy *zombie, Character *player)
     return sqrt(pow(zombie->x - player->x, 2) + pow(zombie->y - player->y, 2)) <= zombie->range;
 }
 
-void zombie_attack(Enemy *zombie, Character *player)
+double calculateShootingAngle(Enemy *zombie, Character *player)
+{
+    // Il faut décaler la position du joueur et du zombie pour être centré
+    double dx = player->x + player->width/2 - zombie->x - zombie->width/2;
+    double dy = player->y + player->height/2 - zombie->y - zombie->height/2;
+    return atan2(dy, dx);
+}
+
+void zombie_attack(Enemy *zombie, Character *player, SDL_Renderer *renderer)
 {
     if (!zombie->isAShooter)
     {
         player->health = player->health - zombie->attack_damage;
         printf("HIT! Loli's life is now %d\n",player->health);
+    } else {
+        init_medal(zombie, player, renderer);
     }
+}
+
+int medalTouchPlayer(Medal medal, Character *player) {
+    // Vérifie si la médaille est à l'intérieur de la hitbox du joueur
+    if (medal.x >= player->x && medal.x <= player->x + player->width &&
+        medal.y >= player->y && medal.y <= player->y + player->height) {
+        return 1;
+    }
+    return 0;
 }
 
 void move_zombie(Enemy **zombie, Character *player)
 {
+    // On déplace les médailles
+    MedalList *current = (*zombie)->medals;
+    MedalList *tmp; // Utiliser quand on supprime une médaille
+    while (current != NULL)
+    {
+        double dx = current->medal.speed * cos(current->medal.angle);
+        double dy = current->medal.speed * sin(current->medal.angle);
+        current->medal.x += dx;
+        current->medal.y += dy;
+
+        if (current->medal.x < 50 || current->medal.x > 1870 || current->medal.y < 50 || current->medal.y > 1030 - 1920 / (MAP_WIDTH+2))
+        {
+            // Il faut détruire les médailles si elles sortent de l'écran
+            tmp = current;
+            current = current->next;
+            removeMedal(*zombie, tmp->medal);
+        } else if (medalTouchPlayer(current->medal, player))
+        {
+            // Il faut infliger des dégâts si on touche le joueur
+            player->health = player->health - (*zombie)->attack_damage;
+            printf("HIT! Loli's life is now %d\n",player->health);
+            tmp = current;
+            current = current->next;
+            removeMedal(*zombie, tmp->medal);
+        } else {
+            // J'avais oublié cette ligne, c'est une bonne idée si vous voulez tout faire freeze et faire un barbecue sur le cpu      
+            current = current->next;
+        }  
+    }
+
+    // On déplace le zombie
     if (!zombie_is_in_range(*zombie, player)){
         int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
         // On multiplie par sqrt(2) en diagonale
@@ -373,4 +487,17 @@ void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileNa
         free(graph[i]);
     }
     free(graph);
+}
+
+// On fait une fonction free custom pour pouvoir free la liste chaînée aussi
+void free_zombie(Enemy *zombie)
+{
+    MedalList* current = zombie->medals;
+    MedalList* next;
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    free(zombie);
 }

@@ -367,11 +367,10 @@ int main() {
             character_delay_frame++;
 
             if (zombie_is_in_range(zombie, &character) && zombie->health>0 && character.health>0) {
-                // Collision détectée
                 zombie->isInsidePlayer = 1;
                 if (SDL_GetTicks()-last_zombie_hit>=500){
                     last_zombie_hit = SDL_GetTicks();
-                    zombie_attack(zombie, &character);
+                    zombie_attack(zombie, &character, renderer);
                 }
             } else {
                 zombie->isInsidePlayer = 0;
@@ -468,7 +467,7 @@ int main() {
         free(attacksRectsrc);
         free(collisionTable);
         free(zombieRectSrc);
-        free(zombie);
+        free_zombie(zombie);
         free(collisionTableFileName);
         free(items);
     }
