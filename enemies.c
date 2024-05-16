@@ -6,8 +6,7 @@
 #include "structures.h"
 #include "enemies.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter)
-// isAShooter = 1 si le zombie peut tirer, 0 sinon
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles)
 {
     // Chargement de la texture
     if (isAShooter)
@@ -17,10 +16,18 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
         *zombieTexture = get_texture("assets/zombie.png", renderer);
     }
 
+    int indexHole = randomInt(tailleMapHoles);
+    int tileNumber = tabMapHoles[indexHole];
+    int xCoord;
+    int yCoord;     
+    getCoordFromTiles(tileNumber, &xCoord, &yCoord);
+    xCoord = xCoord*(SCREEN_WIDTH/16);
+    yCoord = yCoord*(SCREEN_HEIGHT/9);
+
     // Création de l'objet
     *zombie = malloc(sizeof(Enemy));
-    (*zombie)->x = 200;
-    (*zombie)->y = 200;
+    (*zombie)->x = xCoord;
+    (*zombie)->y = yCoord;
     (*zombie)->width = SCREEN_WIDTH / 16;
     (*zombie)->height = SCREEN_HEIGHT / 9;
     (*zombie)->currentVertex = 0;

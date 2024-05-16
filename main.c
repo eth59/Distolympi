@@ -8,6 +8,7 @@
 #include "collisionHandling.h"
 #include "enemies.h"
 #include "inventory.h"
+#include "randomSpawn.h"
 
 #define MAX_ITEM_TYPES 3
 
@@ -123,6 +124,10 @@ int main() {
         char *collisionTableFileName = getColliderTable(index);
         char *collisionTable = openCollisionFile(collisionTableFileName);
 
+         // on récupère le fichier qui contient les tiles libres 
+        char *mapHoles = getMapHoles(index);
+        int tailleMapHoles;
+        int *tabMapHoles = convertirFichierEnTableau(mapHoles, &tailleMapHoles);
 
         // charger fond d'écran
         SDL_Texture *backgroundTexture = get_texture(map, renderer);
@@ -176,11 +181,12 @@ int main() {
         // Charger la texture du fromage
         SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
+
         // Initialisation du zombie
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, 1);
+        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, 1, tailleMapHoles, tabMapHoles);
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
@@ -470,6 +476,8 @@ int main() {
         free_zombie(zombie);
         free(collisionTableFileName);
         free(items);
+        free(mapHoles);
+        free(tabMapHoles);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
