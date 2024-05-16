@@ -20,10 +20,10 @@ void add_to_inventory(Inventory *inventory, Object item) {
 }
 
 // Fonction pour charger les textures des objets
-void load_item_textures(SDL_Renderer* renderer, Item* items) {
+void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type) {
     // Charger la texture du fromage
-    items[0].texture = get_texture("assets/cheese.png", renderer);
-    items[0].type = 0;
+    items[0].texture = get_texture(item_path, renderer);
+    items[0].type = type;
 }
 
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {
@@ -79,4 +79,42 @@ void draw_health_bar(SDL_Renderer* renderer, int x, int y, int current_health, i
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // vert sinon
     }
     SDL_RenderFillRect(renderer, &health_rect);
+}
+
+// Fonction pour initialiser un objet
+Object init_object(float x, float y, int width, int height, int type, int ground) {
+    Object obj = {
+        .x = x,
+        .y = y,
+        .width = width,
+        .height = height,
+        .type = type,
+        .ground = ground
+    };
+    return obj;
+}
+
+void use_selected_object(Character *character, int *selected_item) {
+    if (*selected_item >= 0 && *selected_item < MAX_INVENTORY_SIZE && 
+    character->inventory.items[*selected_item].ground == 0) {
+        Object *selected_object = &character->inventory.items[*selected_item];
+        use_object(character, selected_object, *selected_item);
+        *selected_item = -1; // Réinitialiser l'index de l'objet sélectionné
+    }
+}
+
+void use_object(Character *character, Object *object, int selected_item) {
+    if (object->type == 0) { // Si l'objet est de type nourriture
+        int health_increase = 10; // Augmentation des points de vie
+        character->health = fmin(character->health + health_increase, character->max_health); // sans dépasser la valeur maximale
+    } else if (object->type == 1) { // Si l'objet est une arme
+        character->attack_damage += 10; // Augmentation des dégâts d'attaque
+    } else { // Si l'objet est un équipement
+        character->speed += 5; // Augmentation de la vitesse du personnage
+    }
+    // Pour supprimer l'objet de l'inventaire
+    for (int i = selected_item; i < character->inventory.count - 1; i++) {
+        character->inventory.items[i] = character->inventory.items[i + 1];
+    }
+    character->inventory.count--;
 }

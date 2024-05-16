@@ -53,6 +53,8 @@ int main() {
     int running = 1;
     int in_menu = 1;
     int in_settings = 0;
+    int selected_item = -1;
+
     while(running){
         int playing = 1;
         while(in_menu){
@@ -114,7 +116,7 @@ int main() {
             printf("Erreur d'allocation de mémoire pour items\n");
             exit(1);
         }
-        load_item_textures(renderer, items);
+        
         // selection aléatoire du fond d'écran
         int index = randomMapIndex();
         char *map = getMapFromIndex(index);
@@ -129,7 +131,7 @@ int main() {
 
         // liberer la mémoire allouée a map
         free(map);
-        // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pr le zombie
+        // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pour le zombie
 
         // Charger la texture des attaques
         SDL_Texture *attacksTexture = get_texture("assets/Attaquesx.png",renderer);
@@ -164,17 +166,12 @@ int main() {
 
         
         // Initialisation d'un 1er objet : un fromage
-        Object cheese = {
-            .x = 50,
-            .y = 50,
-            .height = 100,
-            .width = 100,
-            .ground = 1,
-            .type = 0
-        };
+        Object cheese = init_object(50, 50, 100, 100, 0, 1);
 
         // Charger la texture du fromage
-        SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
+        char* cheese_path = "assets/cheese.png";
+        load_item_textures(renderer, items, cheese_path, 0); // pour charger le fromage
+        SDL_Texture *cheeseTexture = get_texture(cheese_path,renderer);
 
         // Initialisation du zombie
         Enemy *zombie;
@@ -274,6 +271,26 @@ int main() {
                             case SDLK_SPACE:
                                 key_space_pressed = 1;
                                 break;
+                            case SDLK_1:
+                                selected_item = 0;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_2: 
+                                selected_item = 1;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_3: 
+                                selected_item = 2;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_4:
+                                selected_item = 3;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_5:
+                                selected_item = 4;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
                         }
                         break;
                     case SDL_KEYUP:
@@ -302,6 +319,22 @@ int main() {
 
             if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
                 direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
+            }
+
+           // Mettre à jour la variable selected_item en fonction des touches appuyées
+            if (event.key.keysym.sym == SDLK_1) {
+                selected_item = 0;
+            } else if (event.key.keysym.sym == SDLK_2) { 
+                selected_item = 1;
+            } else if (event.key.keysym.sym == SDLK_3) { 
+                selected_item = 2;
+            } else if (event.key.keysym.sym == SDLK_4) {
+                selected_item = 3;
+            } else if (event.key.keysym.sym == SDLK_5) {
+                selected_item = 4;
+            } else {
+                // Réinitialiser la variable selected_item si aucune touche d'inventaire n'est appuyée
+                selected_item = -1;
             }
 
             // rendu graphique
