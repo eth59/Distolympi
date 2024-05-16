@@ -6,10 +6,16 @@
 #include "structures.h"
 #include "enemies.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc)
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter)
+// isAShooter = 1 si le zombie peut tirer, 0 sinon
 {
     // Chargement de la texture
-    *zombieTexture = get_texture("assets/zombie.png", renderer);
+    if (isAShooter)
+    {
+        *zombieTexture = get_texture("assets/male.png", renderer);
+    } else {
+        *zombieTexture = get_texture("assets/zombie.png", renderer);
+    }
 
     // Création de l'objet
     *zombie = malloc(sizeof(Enemy));
@@ -28,6 +34,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->attack_damage = 5;
     (*zombie)->health = 30;
     (*zombie)->isInsidePlayer = 0;
+    (*zombie)->range = (isAShooter) ? 300 : 50;
+    (*zombie)->isAShooter = isAShooter;
     
     // On divise le tileset du zombie
     *zombieRectSrc = get_frames(32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
@@ -40,9 +48,14 @@ void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTex
     SDL_RenderCopy(renderer, zombieTexture, &zombieRectSrc[sprite_nb], &zombieRectDest);
 }
 
+int zombie_is_in_range(Enemy *zombie, Character *player)
+{
+    return sqrt(pow(zombie->x - player->x, 2) + pow(zombie->y - player->y, 2)) <= zombie->range;
+}
+
 void move_zombie(Enemy **zombie, Character *player)
 {
-    if (!(*zombie)->isInsidePlayer) {
+    if (!zombie_is_in_range(*zombie, player)){
         int diff = (*zombie)->nextVertex - (*zombie)->currentVertex;
         // On multiplie par sqrt(2) en diagonale
         // pour éviter une impression de vitesse plus élevée

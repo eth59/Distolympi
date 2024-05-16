@@ -180,7 +180,7 @@ int main() {
         Enemy *zombie;
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc);
+        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, 1);
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
@@ -342,10 +342,10 @@ int main() {
                 if(attacks_animation_frame>4){
                     attack_dispo = 0;
                     attack_flag = 0;
-                    if (SDL_HasIntersection(&zombieRectDest, &attacksRectdest)) {
-                        // Collision détectée
-                            zombie->health = zombie->health - character.attack_damage;
-                            printf("HIT! Zombie's life is now %d\n",zombie->health);
+                    // L'attaque se fait si le zombie est à portée et plus si collision entre les hitboxs pour un meilleur rendu
+                    if (zombie_is_in_range(zombie, &character)) {
+                        zombie->health = zombie->health - character.attack_damage;
+                        printf("HIT! Zombie's life is now %d\n",zombie->health);
                     }
                 }
                 attacks_delay_frame++;
