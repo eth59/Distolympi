@@ -53,6 +53,15 @@ int zombie_is_in_range(Enemy *zombie, Character *player)
     return sqrt(pow(zombie->x - player->x, 2) + pow(zombie->y - player->y, 2)) <= zombie->range;
 }
 
+void zombie_attack(Enemy *zombie, Character *player)
+{
+    if (!zombie->isAShooter)
+    {
+        player->health = player->health - zombie->attack_damage;
+        printf("HIT! Loli's life is now %d\n",player->health);
+    }
+}
+
 void move_zombie(Enemy **zombie, Character *player)
 {
     if (!zombie_is_in_range(*zombie, player)){

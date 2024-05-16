@@ -27,6 +27,7 @@ typedef struct {
 void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter);
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
 int zombie_is_in_range(Enemy *zombie, Character *player);
+void zombie_attack(Enemy *zombie, Character *player);
 void move_zombie(Enemy **zombie, Character *player);
 int **readMapCollisionFile(char *fileName);
 float **mapToGraph(int **map);

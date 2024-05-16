@@ -366,13 +366,12 @@ int main() {
             }
             character_delay_frame++;
 
-            if (SDL_HasIntersection(&zombieHitboxRect, &characterHitboxRect) && zombie->health>0 && character.health>0) {
+            if (zombie_is_in_range(zombie, &character) && zombie->health>0 && character.health>0) {
                 // Collision détectée
                 zombie->isInsidePlayer = 1;
                 if (SDL_GetTicks()-last_zombie_hit>=500){
                     last_zombie_hit = SDL_GetTicks();
-                    character.health = character.health - zombie->attack_damage;
-                    printf("HIT! Loli's life is now %d\n",character.health);
+                    zombie_attack(zombie, &character);
                 }
             } else {
                 zombie->isInsidePlayer = 0;
