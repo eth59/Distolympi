@@ -474,7 +474,8 @@ int main() {
                     
                     SDL_RenderPresent(renderer);
                 }
-                while(game_in_pause){
+            }
+            while(game_in_pause){
                     if (SDL_PollEvent(&event)) {
                         switch (event.type) {
                             case SDL_QUIT:
@@ -497,7 +498,6 @@ int main() {
                         }
                     }
                 }
-            }
         }
         
         // Libérer la mémoire et quitter SDL
@@ -519,7 +519,6 @@ int main() {
         free(collisionTableFileName);
         free(items);
         free(mapHoles);
-        free(tabMapHoles);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
