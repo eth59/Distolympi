@@ -42,7 +42,7 @@ typedef struct {
     MedalList *medals; // Liste des médailles qu'il a tiré
 } Enemy;
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles);
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber);
 void addMedal(Enemy* zombie, Medal medal);
 void removeMedal(Enemy* zombie, Medal medal);
 void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer);

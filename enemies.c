@@ -5,8 +5,9 @@
 #include "animations.h"
 #include "structures.h"
 #include "enemies.h"
+#include "randomSpawn.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles)
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber)
 {
     // Chargement de la texture
     if (isAShooter)
@@ -16,11 +17,12 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
         *zombieTexture = get_texture("assets/zombie.png", renderer);
     }
 
-    int indexHole = randomInt(tailleMapHoles);
+    int indexHole = randomInt(tailleMapHoles/zombieNumber);
+    indexHole = indexHole + zombieIndex*tailleMapHoles/zombieNumber;
     int tileNumber = tabMapHoles[indexHole];
     int xCoord;
     int yCoord;     
-    getCoordFromTiles(tileNumber, &xCoord, &yCoord);
+    getCoordFromTiles(tileNumber, &xCoord, &yCoord);    
     xCoord = xCoord*(SCREEN_WIDTH/16);
     yCoord = yCoord*(SCREEN_HEIGHT/9);
 

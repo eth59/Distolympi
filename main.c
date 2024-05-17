@@ -181,12 +181,23 @@ int main() {
         // Charger la texture du fromage
         SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
 
+        int zombieNumber = 4;
+        int zombieRemaining = 0;
 
-        // Initialisation du zombie
-        Enemy *zombie;
+        Enemy **zombieTab = (Enemy **)malloc(zombieNumber*sizeof(Enemy));
+        SDL_Rect *zombieRectDestTab = (SDL_Rect *)malloc(zombieNumber*sizeof(SDL_Rect));
+
         SDL_Texture *zombieTexture;
         SDL_Rect *zombieRectSrc;
-        init_zombie(&zombie, renderer, &zombieTexture, &zombieRectSrc, 1, tailleMapHoles, tabMapHoles);
+
+        for (int i = 0; i < zombieNumber; i++) {
+            if (i%2 == 0) {
+                init_zombie(&zombieTab[i], renderer, &zombieTexture, &zombieRectSrc, 1, tailleMapHoles, tabMapHoles, i, zombieNumber);
+            } else {
+                init_zombie(&zombieTab[i], renderer, &zombieTexture, &zombieRectSrc, 0, tailleMapHoles, tabMapHoles, i, zombieNumber);
+            }
+        }
+        
 
         // Charger la texture de l'inventaire
         SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
@@ -320,14 +331,19 @@ int main() {
             SDL_Rect backgroundRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT-120};
             SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
-            if(zombie->health>0){
-                // Actions mobs & gestion interaction
-                pathfinding(zombie, &character, collisionTableFileName);
-                move_zombie(&zombie, &character);
-                // Rendu du zombie
-                render_zombie(zombie, renderer, zombieTexture, zombieRectSrc);
+            for (int i = 0; i < zombieNumber; i++) {
+                if(zombieTab[i]->health>0){
+                    // Actions mobs & gestion interaction
+                    pathfinding(zombieTab[i], &character, collisionTableFileName);
+                    move_zombie(&zombieTab[i], &character);
+                    // Rendu du zombie
+                    render_zombie(zombieTab[i], renderer, zombieTexture, zombieRectSrc);
+                }
+                zombieRectDestTab[i].x = (int)zombieTab[i]->x;
+                zombieRectDestTab[i].y = (int)zombieTab[i]->y;
+                zombieRectDestTab[i].w = zombieTab[i]->width;
+                zombieRectDestTab[i].h = zombieTab[i]->height;
             }
-            SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
 
             //Rendu attacks 
             if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
@@ -349,9 +365,11 @@ int main() {
                     attack_dispo = 0;
                     attack_flag = 0;
                     // L'attaque se fait si le zombie est à portée et plus si collision entre les hitboxs pour un meilleur rendu
-                    if (zombie_is_in_range(zombie, &character)) {
-                        zombie->health = zombie->health - character.attack_damage;
-                        printf("HIT! Zombie's life is now %d\n",zombie->health);
+                    for (int i = 0; i < zombieNumber; i++) {
+                        if (zombie_is_in_range(zombieTab[i], &character)) {
+                            zombieTab[i]->health = zombieTab[i]->health - character.attack_damage;
+                            printf("HIT! Zombie's life is now %d\n",zombieTab[i]->health);
+                        }
                     }
                 }
                 attacks_delay_frame++;
@@ -363,7 +381,6 @@ int main() {
             character_animation_frame=character_animation_frame%character_max_column_frame;// cycle d'animation
             SDL_Rect characterRectdest = {(int)character.x, (int)character.y, (int)character.width, (int)character.height};
             SDL_Rect characterHitboxRect = {character.xHitBox, character.y, character.hitBoxWidth, character.height};
-            SDL_Rect zombieHitboxRect = {zombie->x + SCREEN_WIDTH/64, zombie->y, zombie->width - SCREEN_WIDTH/32, zombie->height};
             
             
             if(character_delay_frame>20/character.speed){
@@ -371,15 +388,16 @@ int main() {
                 character_delay_frame=0;
             }
             character_delay_frame++;
-
-            if (zombie_is_in_range(zombie, &character) && zombie->health>0 && character.health>0) {
-                zombie->isInsidePlayer = 1;
-                if (SDL_GetTicks()-last_zombie_hit>=500){
-                    last_zombie_hit = SDL_GetTicks();
-                    zombie_attack(zombie, &character, renderer);
+            for (int i = 0; i < zombieNumber; i++) {
+                if (zombie_is_in_range(zombieTab[i], &character) && zombieTab[i]->health>0 && character.health>0) {
+                    zombieTab[i]->isInsidePlayer = 1;
+                    if (SDL_GetTicks()-last_zombie_hit>=500){
+                        last_zombie_hit = SDL_GetTicks();
+                        zombie_attack(zombieTab[i], &character, renderer);
+                    }
+                } else {
+                    zombieTab[i]->isInsidePlayer = 0;
                 }
-            } else {
-                zombie->isInsidePlayer = 0;
             }
 
             // Rendu du fromage
@@ -407,9 +425,12 @@ int main() {
                     in_menu = 1;
                 }
             }
-            else if(zombie->health <= 0 ){
-                zombie->speed = 0;
-                SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDest);
+            else { for (int i = 0; i < zombieNumber; i++) {
+                if(zombieTab[i]->health <= 0 ){
+                zombieTab[i]->speed = 0;
+                SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDestTab[i]);
+            }
+            }
             }
 
             // On dessine le personnage tout a la fin pour que la texture soit au dessus de toutes les autres
@@ -473,7 +494,11 @@ int main() {
         free(attacksRectsrc);
         free(collisionTable);
         free(zombieRectSrc);
-        free_zombie(zombie);
+        for (int i = 0; i < zombieNumber; i++) {    
+            free_zombie(zombieTab[i]);
+        }
+        free(zombieTab);
+        free(zombieRectDestTab);
         free(collisionTableFileName);
         free(items);
         free(mapHoles);
