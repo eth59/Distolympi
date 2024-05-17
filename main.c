@@ -10,8 +10,6 @@
 #include "inventory.h"
 #include "objects.h"
 
-#define MAX_ITEM_TYPES 3
-
 
 int main() {
     Uint32 startTime, endTime, deltaTime;
@@ -165,24 +163,42 @@ int main() {
         int character_max_line_frame=10;
         SDL_Rect* characterRectsrc=get_frames(32,32,character_max_line_frame,character_max_column_frame);
 
-        
-        // Initialisation d'un 1er objet : un fromage
-        Object cheese = init_object(50, 50, 100, 100, 0, 1);
-        int cheeseAdded = 0;
+        // Initialiser les variables pour les objets aléatoires
+        Object randomObjects[MAX_RANDOM_OBJECTS];
+        int numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
 
-        // Charger la texture du fromage
-        char* cheese_path = "assets/cheese.png";
-        load_item_textures(renderer, items, cheese_path, 0, 0); 
-        SDL_Texture *cheeseTexture = get_texture(cheese_path,renderer);
+        // Générer aléatoirement les objets
+        for (int i = 0; i < MAX_RANDOM_OBJECTS; i++) {
+            int randX = rand() % SCREEN_WIDTH;
+            int randY = rand() % SCREEN_HEIGHT;
+            int randWidth = rand() % MAX_OBJECT_WIDTH + MIN_OBJECT_WIDTH;
+            int randHeight = rand() % MAX_OBJECT_HEIGHT + MIN_OBJECT_HEIGHT;
+            int randType = rand() % MAX_ITEM_TYPES;
+            randomObjects[i] = init_object(randX, randY, randWidth, randHeight, randType, 1);
+        }
 
-         // Initialisation d'un 1er objet : une baguette
-        Object baguette = init_object(300, 300, 100, 100, 1, 1);
-        int baguetteAdded = 0;
+        // Charger les textures pour les objets aléatoires
+        for (int i = 0; i < numRandomObjects; i++) {
+            char objectPath[50];
+            sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
+            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i);
+        }
 
-        // Charger la texture du fromage
-        char* baguette_path = "assets/baguette.png";
-        load_item_textures(renderer, items, baguette_path, 1, 1);
-        SDL_Texture *baguetteTexture = get_texture(baguette_path,renderer);
+       // Rendu des objets aléatoires
+        for (int i = 0; i < numRandomObjects; i++) {
+            SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
+            
+            // Vérifier si la texture de l'objet aléatoire a été chargée correctement
+            if (items[randomObjects[i].type].texture == NULL) {
+                printf("Erreur : la texture de l'objet aléatoire %d n'a pas été chargée correctement\n", i);
+                printf("SDL_GetError() : %s\n", SDL_GetError());
+            } else {
+                printf("object %d type %d\n", i, randomObjects[i].type);
+                printf("Texture address: %p\n", items[randomObjects[i].type].texture);
+                SDL_RenderCopy(renderer, items[randomObjects[i].type].texture, NULL, &objectRect);
+            }
+        }
+
 
         // Initialisation du zombie
         Enemy *zombie;
@@ -258,11 +274,11 @@ int main() {
                                 break;
 
                             case SDLK_e:
-                                if (check_object_collision(&cheese, &character)) {
-                                    cheeseAdded = 1;
-                                } 
-                                if (check_object_collision(&baguette, &character)) {
-                                    baguetteAdded = 1;
+                                // Vérifier les collisions avec tous les objets
+                                for (int i = 0; i < numRandomObjects; i++) {
+                                    if (check_object_collision(&randomObjects[i], &character)) {
+                                        randomObjects[i].ground = 0;
+                                    }
                                 }
                                 break;
 
@@ -421,18 +437,14 @@ int main() {
                 zombie->isInsidePlayer = 0;
             }
 
-            if (cheeseAdded == 0) {
-                // Rendu du fromage
-                SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
-                SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+            // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
+            for (int i = 0; i < numRandomObjects; i++) {
+                if (randomObjects[i].ground) {
+                    SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
+                    SDL_Texture *objectTexture = randomObjects[i].texture;
+                    SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
+                }
             }
-
-            if (baguetteAdded == 0) {
-                // Rendu de la baguette
-                SDL_Rect baguetteRect = {(int)baguette.x, (int)baguette.y, baguette.width, baguette.height};
-                SDL_RenderCopy(renderer, baguetteTexture, NULL, &baguetteRect);
-            }
-
 
             if(character.health<=20){
                 if( startTime-low_on_life_time>200){
@@ -512,10 +524,12 @@ int main() {
 
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
-        SDL_DestroyTexture(cheeseTexture);
-        SDL_DestroyTexture(baguetteTexture);
         SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
+
+        for (int i = 0; i < numRandomObjects; i++) {
+            SDL_DestroyTexture(randomObjects[i].texture);
+        }
 
         free(characterRectsrc);
         free(attacksRectsrc);

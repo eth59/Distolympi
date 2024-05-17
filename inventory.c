@@ -25,6 +25,7 @@ void add_to_inventory(Inventory *inventory, Object *object) {
 void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type, int index) {
     items[index].texture = get_texture(item_path, renderer);
     items[index].type = type;
+    printf("Texture chargée pour l'objet %d : %p\n", index, items[index].texture);
 }
 
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {
