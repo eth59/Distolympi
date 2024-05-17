@@ -366,7 +366,7 @@ int main() {
                     attack_flag = 0;
                     // L'attaque se fait si le zombie est à portée et plus si collision entre les hitboxs pour un meilleur rendu
                     for (int i = 0; i < zombieNumber; i++) {
-                        if (zombie_is_in_range(zombieTab[i], &character)) {
+                        if (SDL_HasIntersection(&zombieRectDestTab[i], &attacksRectdest)) {
                             zombieTab[i]->health = zombieTab[i]->health - character.attack_damage;
                             printf("HIT! Zombie's life is now %d\n",zombieTab[i]->health);
                         }
