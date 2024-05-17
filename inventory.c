@@ -22,11 +22,16 @@ void add_to_inventory(Inventory *inventory, Object *object) {
 }
 
 // Fonction pour charger les textures des objets
-void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type, int index) {
-    items[index].texture = get_texture(item_path, renderer);
+void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type, int index, Object* randomObjects) {
+    SDL_Texture* item_texture = get_texture(item_path, renderer);
+    if (item_texture == NULL) {
+        printf("Erreur : impossible de charger la texture de l'objet %d\n", index);
+        exit(1);
+    }
+    items[index].texture = item_texture;
     items[index].type = type;
-    printf("Texture chargée pour l'objet %d : %p\n", index, items[index].texture);
 }
+
 
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {
     // Définir la position et la taille de l'inventaire

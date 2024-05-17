@@ -168,35 +168,30 @@ int main() {
         int numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
 
         // Générer aléatoirement les objets
-        for (int i = 0; i < MAX_RANDOM_OBJECTS; i++) {
+        for (int i = 0; i < numRandomObjects; i++) {
             int randX = rand() % SCREEN_WIDTH;
             int randY = rand() % SCREEN_HEIGHT;
             int randWidth = rand() % MAX_OBJECT_WIDTH + MIN_OBJECT_WIDTH;
             int randHeight = rand() % MAX_OBJECT_HEIGHT + MIN_OBJECT_HEIGHT;
             int randType = rand() % MAX_ITEM_TYPES;
-            randomObjects[i] = init_object(randX, randY, randWidth, randHeight, randType, 1);
+            randomObjects[i] = init_object(randX, randY, randWidth, randHeight, randType, 1, NULL);
+            char objectPath[50];
+            sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
+            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i, &randomObjects[i]);
         }
+
 
         // Charger les textures pour les objets aléatoires
         for (int i = 0; i < numRandomObjects; i++) {
             char objectPath[50];
             sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
-            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i);
+            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i, &randomObjects[i]);
         }
 
        // Rendu des objets aléatoires
         for (int i = 0; i < numRandomObjects; i++) {
             SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
-            
-            // Vérifier si la texture de l'objet aléatoire a été chargée correctement
-            if (items[randomObjects[i].type].texture == NULL) {
-                printf("Erreur : la texture de l'objet aléatoire %d n'a pas été chargée correctement\n", i);
-                printf("SDL_GetError() : %s\n", SDL_GetError());
-            } else {
-                printf("object %d type %d\n", i, randomObjects[i].type);
-                printf("Texture address: %p\n", items[randomObjects[i].type].texture);
-                SDL_RenderCopy(renderer, items[randomObjects[i].type].texture, NULL, &objectRect);
-            }
+            SDL_RenderCopy(renderer, randomObjects[i].texture, NULL, &objectRect); 
         }
 
 
@@ -439,7 +434,7 @@ int main() {
 
             // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
             for (int i = 0; i < numRandomObjects; i++) {
-                if (randomObjects[i].ground) {
+                if (randomObjects[i].ground) { // Vérifier si l'objet est au sol et peut être ramassé
                     SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
                     SDL_Texture *objectTexture = randomObjects[i].texture;
                     SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);

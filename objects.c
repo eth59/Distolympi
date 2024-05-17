@@ -5,16 +5,16 @@
 
 
 // Fonction pour initialiser un objet
-Object init_object(float x, float y, int width, int height, int type, int ground) {
-    Object obj = {
-        .x = x,
-        .y = y,
-        .width = width,
-        .height = height,
-        .type = type,
-        .ground = ground
-    };
-    return obj;
+Object init_object(float x, float y, int width, int height, int type, int ground, SDL_Texture* texture) {
+    Object object;
+    object.x = x;
+    object.y = y;
+    object.width = width;
+    object.height = height;
+    object.type = type;
+    object.ground = ground;
+    object.texture = NULL;
+    return object;
 }
 
 void use_selected_object(Character *character, int *selected_item) {
@@ -80,7 +80,7 @@ void generate_random_objects(Object *objects, int num_objects, int width, int he
         int type = generate_random_item_type();
         
         // Initialiser l'objet avec des coordonnées aléatoires et le type sélectionné
-        Object object = init_object(0, 0, width, height, type, 1);
+        Object object = init_object(0, 0, width, height, type, 1, NULL);
         generate_random_coordinates(&object, width, height);
         
         // Copier l'objet généré dans le tableau d'objets
