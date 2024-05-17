@@ -8,6 +8,7 @@
 #include "collisionHandling.h"
 #include "enemies.h"
 #include "inventory.h"
+#include "objects.h"
 
 #define MAX_ITEM_TYPES 3
 
@@ -167,11 +168,21 @@ int main() {
         
         // Initialisation d'un 1er objet : un fromage
         Object cheese = init_object(50, 50, 100, 100, 0, 1);
+        int cheeseAdded = 0;
 
         // Charger la texture du fromage
         char* cheese_path = "assets/cheese.png";
-        load_item_textures(renderer, items, cheese_path, 0); // pour charger le fromage
+        load_item_textures(renderer, items, cheese_path, 0); 
         SDL_Texture *cheeseTexture = get_texture(cheese_path,renderer);
+
+         // Initialisation d'un 1er objet : une baguette
+        Object baguette = init_object(300, 300, 100, 100, 1, 1);
+        int baguetteAdded = 0;
+
+        // Charger la texture du fromage
+        char* baguette_path = "assets/baguette.png";
+        load_item_textures(renderer, items, baguette_path, 1);
+        SDL_Texture *baguetteTexture = get_texture(baguette_path,renderer);
 
         // Initialisation du zombie
         Enemy *zombie;
@@ -204,8 +215,6 @@ int main() {
         int attacks_delay_frame = 0;
         int attack_dispo = 1;
         int attack_flag = 0;
-
-        int cheeseAdded = 0;
 
         // flags pour animation
         int direction = 0;
@@ -247,15 +256,10 @@ int main() {
                                 playing = 0;
                                 break;
                             case SDLK_e:
-                                // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
-                                if (!cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
-                                    character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
-                                    add_to_inventory(&character.inventory, cheese);
-                                    cheese.ground = 0; 
-                                    SDL_DestroyTexture(cheeseTexture);
-                                    cheeseAdded = 1;
-                                }
+                                check_object_collision(&cheese, &character, &cheeseAdded, cheeseTexture);
+                                check_object_collision(&baguette, &character, &baguetteAdded, baguetteTexture);
                                 break;
+
                             case SDLK_q:
                                 key_left_pressed = 1;
                                 break;
@@ -413,6 +417,11 @@ int main() {
             SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
             SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
 
+            // Rendu de la baguette
+            SDL_Rect baguetteRect = {(int)baguette.x, (int)baguette.y, baguette.width, baguette.height};
+            SDL_RenderCopy(renderer, baguetteTexture, NULL, &baguetteRect);
+
+
             if(character.health<=20){
                 if( startTime-low_on_life_time>200){
                 low_on_life_time = startTime;
@@ -489,10 +498,10 @@ int main() {
         
         // Libérer la mémoire et quitter SDL
 
-
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
         SDL_DestroyTexture(cheeseTexture);
+        SDL_DestroyTexture(baguetteTexture);
         SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
 
