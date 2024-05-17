@@ -39,14 +39,16 @@ typedef struct {
     int isInsidePlayer; // 1 si le zombie peut attaquer le joueur, 0 sinon
     int range; // Portée d'attaque
     int isAShooter; // 1 si le zombie peut tirer, 0 sinon
+    SDL_Texture *texture;
+    SDL_Rect *rectSrc;
     MedalList *medals; // Liste des médailles qu'il a tiré
 } Enemy;
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber);
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber);
 void addMedal(Enemy* zombie, Medal medal);
 void removeMedal(Enemy* zombie, Medal medal);
 void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer);
-void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc);
+void render_zombie(Enemy *zombie, SDL_Renderer *renderer);
 int zombie_is_in_range(Enemy *zombie, Character *player);
 double calculateShootingAngle(Enemy *zombie, Character *player);
 void zombie_attack(Enemy *zombie, Character *player, SDL_Renderer *renderer);

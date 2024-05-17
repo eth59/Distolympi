@@ -48,7 +48,8 @@ int main() {
         exit(-1);
     }
 
-    SDL_Texture*  dead_zombie_texture = get_texture("assets/dead_zombie.png",renderer);
+    SDL_Texture* dead_zombie_texture;
+    get_texture(&dead_zombie_texture, "assets/dead_zombie.png", renderer);
 
 
     int running = 1;
@@ -59,7 +60,8 @@ int main() {
         while(in_menu){
             while(in_settings){
                 SDL_Event event;
-                SDL_Texture* settings_texture = get_texture("assets/Settings.png",renderer);
+                SDL_Texture* settings_texture;
+                get_texture(&settings_texture, "assets/Settings.png", renderer);
                 SDL_RenderCopy(renderer,settings_texture,NULL,NULL);
                 SDL_RenderPresent(renderer);
                 while (SDL_PollEvent(&event)) {
@@ -82,7 +84,8 @@ int main() {
                 }
             }
             SDL_Event event;
-            SDL_Texture* menu_texture = get_texture("assets/Menu.png",renderer);
+            SDL_Texture* menu_texture;
+            get_texture(&menu_texture, "assets/Menu.png", renderer);
             SDL_RenderCopy(renderer,menu_texture,NULL,NULL);
             SDL_RenderPresent(renderer);
             while (SDL_PollEvent(&event)) {
@@ -130,21 +133,25 @@ int main() {
         int *tabMapHoles = convertirFichierEnTableau(mapHoles, &tailleMapHoles);
 
         // charger fond d'écran
-        SDL_Texture *backgroundTexture = get_texture(map, renderer);
+        SDL_Texture *backgroundTexture;
+        get_texture(&backgroundTexture, map, renderer);
 
         // liberer la mémoire allouée a map
         free(map);
         // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pr le zombie
 
         // Charger la texture des attaques
-        SDL_Texture *attacksTexture = get_texture("assets/Attaquesx.png",renderer);
+        SDL_Texture *attacksTexture;
+        get_texture(&attacksTexture, "assets/Attaquesx.png", renderer);
         // On divise la tileset du character 
         int attacks_max_column_frame=5;
         int attacks_max_line_frame=8;
-        SDL_Rect* attacksRectsrc=get_frames(32,32,attacks_max_line_frame,attacks_max_column_frame);
+        SDL_Rect* attacksRectsrc;
+        get_frames(&attacksRectsrc, 32, 32, attacks_max_line_frame, attacks_max_column_frame);
 
         // Charger la texture du personnage
-        SDL_Texture *characterTexture = get_texture("assets/loli.png",renderer);
+        SDL_Texture *characterTexture;
+        get_texture(&characterTexture, "assets/loli.png", renderer);
         // Initialisation du personnage
         Character character = {
             .x = SCREEN_WIDTH / 2,
@@ -165,7 +172,8 @@ int main() {
         // On divise la tileset du character 
         int character_max_column_frame=8;
         int character_max_line_frame=10;
-        SDL_Rect* characterRectsrc=get_frames(32,32,character_max_line_frame,character_max_column_frame);
+        SDL_Rect* characterRectsrc;
+        get_frames(&characterRectsrc, 32, 32, character_max_line_frame, character_max_column_frame);
 
         
         // Initialisation d'un 1er objet : un fromage
@@ -179,28 +187,32 @@ int main() {
         };
 
         // Charger la texture du fromage
-        SDL_Texture *cheeseTexture = get_texture("assets/cheese.png",renderer);
+        SDL_Texture *cheeseTexture;
+        get_texture(&cheeseTexture, "assets/cheese.png", renderer);
 
         int zombieNumber = 4;
         int zombieRemaining = 0;
 
         Enemy **zombieTab = (Enemy **)malloc(zombieNumber*sizeof(Enemy));
+        for (int i = 0; i < zombieNumber; i++)
+        {
+            zombieTab[i] = (Enemy *)malloc(sizeof(Enemy));
+        }
+        
         SDL_Rect *zombieRectDestTab = (SDL_Rect *)malloc(zombieNumber*sizeof(SDL_Rect));
-
-        SDL_Texture *zombieTexture;
-        SDL_Rect *zombieRectSrc;
 
         for (int i = 0; i < zombieNumber; i++) {
             if (i%2 == 0) {
-                init_zombie(&zombieTab[i], renderer, &zombieTexture, &zombieRectSrc, 1, tailleMapHoles, tabMapHoles, i, zombieNumber);
+                init_zombie(&zombieTab[i], renderer, 1, tailleMapHoles, tabMapHoles, i, zombieNumber);
             } else {
-                init_zombie(&zombieTab[i], renderer, &zombieTexture, &zombieRectSrc, 0, tailleMapHoles, tabMapHoles, i, zombieNumber);
+                init_zombie(&zombieTab[i], renderer, 0, tailleMapHoles, tabMapHoles, i, zombieNumber);
             }
         }
         
 
         // Charger la texture de l'inventaire
-        SDL_Texture* inventoryTexture = get_texture("assets/inventory.png", renderer);
+        SDL_Texture* inventoryTexture;
+        get_texture(&inventoryTexture, "assets/inventory.png", renderer);
         if (!inventoryTexture) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading inventory texture: %s", SDL_GetError());
             exit(-1);
@@ -234,7 +246,8 @@ int main() {
         //
         int low_on_life_time;
         int low_on_life_frame = 0;
-        SDL_Texture* low_on_life_texture = get_texture("assets/Low_life1.png",renderer);
+        SDL_Texture* low_on_life_texture;
+        get_texture(&low_on_life_texture, "assets/Low_life1.png", renderer);
         int last_zombie_hit = -1000 ;
         int game_in_pause = 0;
         while (playing) {
@@ -337,7 +350,7 @@ int main() {
                     pathfinding(zombieTab[i], &character, collisionTableFileName);
                     move_zombie(&zombieTab[i], &character);
                     // Rendu du zombie
-                    render_zombie(zombieTab[i], renderer, zombieTexture, zombieRectSrc);
+                    render_zombie(zombieTab[i], renderer);
                 }
                 zombieRectDestTab[i].x = (int)zombieTab[i]->x;
                 zombieRectDestTab[i].y = (int)zombieTab[i]->y;
@@ -406,10 +419,14 @@ int main() {
 
             if(character.health<=20){
                 if( startTime-low_on_life_time>200){
-                low_on_life_time = startTime;
-                low_on_life_frame = 1 - low_on_life_frame;
-                low_on_life_texture = get_texture("assets/Low_life1.png",renderer);
-                if (low_on_life_frame == 1){low_on_life_texture = get_texture("assets/Low_life2.png",renderer);}}
+                    low_on_life_time = startTime;
+                    low_on_life_frame = 1 - low_on_life_frame;
+                    get_texture(&low_on_life_texture, "assets/Low_life1.png", renderer);
+                    if (low_on_life_frame == 1)
+                    {
+                        get_texture(&low_on_life_texture , "assets/Low_life2.png",renderer);
+                    }
+                }
                 SDL_RenderCopy(renderer,low_on_life_texture,NULL,&backgroundRect);
             }
 
@@ -417,7 +434,8 @@ int main() {
                 if(death_time==0){
                     death_time = SDL_GetTicks();
                 }
-                SDL_Texture* death_menu_texture=get_texture("assets/Wasted.png",renderer);
+                SDL_Texture* death_menu_texture;
+                get_texture(&death_menu_texture, "assets/Wasted.png", renderer);
                 SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
                 SDL_DestroyTexture(characterTexture);
                 if(SDL_GetTicks()-death_time>3000){
@@ -450,7 +468,8 @@ int main() {
             if (deltaTime < 1000 / FPS) {
                 SDL_Delay((1000 / FPS) - deltaTime);
                 if(game_in_pause){
-                    SDL_Texture* game_in_pause_texture = get_texture("assets/Game-in-pause.png",renderer);
+                    SDL_Texture* game_in_pause_texture;
+                    get_texture(&game_in_pause_texture, "assets/Game-in-pause.png", renderer);
                     SDL_RenderCopy(renderer,game_in_pause_texture,NULL,&backgroundRect);
                     
                     SDL_RenderPresent(renderer);
@@ -487,13 +506,11 @@ int main() {
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
         SDL_DestroyTexture(cheeseTexture);
-        SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
 
         free(characterRectsrc);
         free(attacksRectsrc);
         free(collisionTable);
-        free(zombieRectSrc);
         for (int i = 0; i < zombieNumber; i++) {    
             free_zombie(zombieTab[i]);
         }

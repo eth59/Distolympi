@@ -22,7 +22,7 @@ void add_to_inventory(Inventory *inventory, Object item) {
 // Fonction pour charger les textures des objets
 void load_item_textures(SDL_Renderer* renderer, Item* items) {
     // Charger la texture du fromage
-    items[0].texture = get_texture("assets/cheese.png", renderer);
+    get_texture(&items[0].texture, "assets/cheese.png", renderer);
     items[0].type = 0;
 }
 

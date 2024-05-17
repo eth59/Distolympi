@@ -7,14 +7,14 @@
 #include "enemies.h"
 #include "randomSpawn.h"
 
-void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTexture, SDL_Rect **zombieRectSrc, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber)
+void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber)
 {
     // Chargement de la texture
     if (isAShooter)
     {
-        *zombieTexture = get_texture("assets/male.png", renderer);
+        get_texture(&(*zombie)->texture, "assets/male.png", renderer);
     } else {
-        *zombieTexture = get_texture("assets/zombie.png", renderer);
+        get_texture(&(*zombie)->texture, "assets/zombie.png", renderer);
     }
 
     int indexHole = randomInt(tailleMapHoles/zombieNumber);
@@ -26,8 +26,6 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     xCoord = xCoord*(SCREEN_WIDTH/16);
     yCoord = yCoord*(SCREEN_HEIGHT/9);
 
-    // Création de l'objet
-    *zombie = malloc(sizeof(Enemy));
     (*zombie)->x = xCoord;
     (*zombie)->y = yCoord;
     (*zombie)->width = SCREEN_WIDTH / 16;
@@ -48,7 +46,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     (*zombie)->medals = NULL;
     
     // On divise le tileset du zombie
-    *zombieRectSrc = get_frames(32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
+    get_frames(&(*zombie)->rectSrc, 32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);
 }
 
 void addMedal(Enemy* zombie, Medal medal) {
@@ -91,13 +89,13 @@ void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer)
     switch (randomNumber)
     {
     case 0:
-        medal.texture = get_texture("assets/gold_medal.png", renderer);
+        get_texture(&medal.texture, "assets/gold_medal.png", renderer);
         break;
     case 1:
-        medal.texture = get_texture("assets/silver_medal.png", renderer);
+        get_texture(&medal.texture, "assets/silver_medal.png", renderer);
         break;
     default:
-        medal.texture = get_texture("assets/bronze_medal.png", renderer);
+        get_texture(&medal.texture, "assets/bronze_medal.png", renderer);
         break;
     }
 
@@ -105,12 +103,12 @@ void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer)
     addMedal(zombie, medal);
 }
 
-void render_zombie(Enemy *zombie, SDL_Renderer *renderer, SDL_Texture *zombieTexture, SDL_Rect *zombieRectSrc)
+void render_zombie(Enemy *zombie, SDL_Renderer *renderer)
 {
     // Render du zombie
     SDL_Rect zombieRectDest = {(int)zombie->x, (int)zombie->y, zombie->width, zombie->height};
     int sprite_nb = zombie->direction * zombie->max_column_frame + zombie->animation_frame;
-    SDL_RenderCopy(renderer, zombieTexture, &zombieRectSrc[sprite_nb], &zombieRectDest);
+    SDL_RenderCopy(renderer, zombie->texture, &zombie->rectSrc[sprite_nb], &zombieRectDest);
 
     // Render des médailles
     MedalList* current = zombie->medals;
