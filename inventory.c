@@ -11,19 +11,20 @@ void init_inventory(Inventory *inventory) {
 }
 
 // Fonction pour ajouter un objet à l'inventaire
-void add_to_inventory(Inventory *inventory, Object item) {
-    if (inventory->count < MAX_INVENTORY_SIZE) {
-        inventory->items[inventory->count++] = item;
-    } else {
-        printf("Inventory is full\n");
+void add_to_inventory(Inventory *inventory, Object *object) {
+    // Vérifier si l'inventaire est plein
+    if (inventory->count >= MAX_INVENTORY_SIZE) {
+        printf("Inventaire plein !\n");
+        return;
     }
+    inventory->items[inventory->count] = *object;
+    inventory->count++;
 }
 
 // Fonction pour charger les textures des objets
-void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type) {
-    // Charger la texture du fromage
-    items[0].texture = get_texture(item_path, renderer);
-    items[0].type = type;
+void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type, int index) {
+    items[index].texture = get_texture(item_path, renderer);
+    items[index].type = type;
 }
 
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {

@@ -9,8 +9,9 @@ typedef struct {
     float y;
     int width;
     int height;
-    int type; // 0 : nourriture, 1 : arme, 2 : équipement défensif, 4 : équipement vitesse 
+    int type; // 0 : nourriture, 1 : arme, 2 : équipement défensif, 3 : équipement vitesse 
     int ground; // 0 : inventaire, 1 : sol
+    SDL_Texture* texture;
 } Object;
 
 // Structure pour caractériser l'inventaire

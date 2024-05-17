@@ -172,7 +172,7 @@ int main() {
 
         // Charger la texture du fromage
         char* cheese_path = "assets/cheese.png";
-        load_item_textures(renderer, items, cheese_path, 0); 
+        load_item_textures(renderer, items, cheese_path, 0, 0); 
         SDL_Texture *cheeseTexture = get_texture(cheese_path,renderer);
 
          // Initialisation d'un 1er objet : une baguette
@@ -181,7 +181,7 @@ int main() {
 
         // Charger la texture du fromage
         char* baguette_path = "assets/baguette.png";
-        load_item_textures(renderer, items, baguette_path, 1);
+        load_item_textures(renderer, items, baguette_path, 1, 1);
         SDL_Texture *baguetteTexture = get_texture(baguette_path,renderer);
 
         // Initialisation du zombie
@@ -236,11 +236,13 @@ int main() {
                         running = 0;
                         playing = 0;
                         break;
+
                     case SDL_MOUSEMOTION:
                         // Récupération des coordonnées de la souris
                         mouseX = event.motion.x;
                         mouseY = event.motion.y;
                         break;
+
                     case SDL_KEYDOWN:
                         switch (event.key.keysym.sym) {
                             // Pour chaque touche de déplacement on met le booléen
@@ -249,15 +251,19 @@ int main() {
                                 game_in_pause = 1;
                                 key_left_pressed = 0;
                                 key_right_pressed = 0;
-                                key_up_pressed = 0;
                                 key_down_pressed = 0;
                                 break;
                             case SDLK_r:
                                 playing = 0;
                                 break;
+
                             case SDLK_e:
-                                check_object_collision(&cheese, &character, &cheeseAdded, cheeseTexture);
-                                check_object_collision(&baguette, &character, &baguetteAdded, baguetteTexture);
+                                if (check_object_collision(&cheese, &character)) {
+                                    cheeseAdded = 1;
+                                } 
+                                if (check_object_collision(&baguette, &character)) {
+                                    baguetteAdded = 1;
+                                }
                                 break;
 
                             case SDLK_q:
@@ -275,6 +281,7 @@ int main() {
                             case SDLK_SPACE:
                                 key_space_pressed = 1;
                                 break;
+
                             case SDLK_1:
                                 selected_item = 0;
                                 use_object(&character, &character.inventory.items[selected_item], selected_item);
@@ -297,6 +304,7 @@ int main() {
                                 break;
                         }
                         break;
+
                     case SDL_KEYUP:
                         switch (event.key.keysym.sym) {
                             // Pour chaque touche de déplacement on met le booléen
@@ -413,13 +421,17 @@ int main() {
                 zombie->isInsidePlayer = 0;
             }
 
-            // Rendu du fromage
-            SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
-            SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+            if (cheeseAdded == 0) {
+                // Rendu du fromage
+                SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
+                SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+            }
 
-            // Rendu de la baguette
-            SDL_Rect baguetteRect = {(int)baguette.x, (int)baguette.y, baguette.width, baguette.height};
-            SDL_RenderCopy(renderer, baguetteTexture, NULL, &baguetteRect);
+            if (baguetteAdded == 0) {
+                // Rendu de la baguette
+                SDL_Rect baguetteRect = {(int)baguette.x, (int)baguette.y, baguette.width, baguette.height};
+                SDL_RenderCopy(renderer, baguetteTexture, NULL, &baguetteRect);
+            }
 
 
             if(character.health<=20){
