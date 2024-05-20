@@ -11,6 +11,7 @@
 #include "randomSpawn.h"
 
 #define MAX_ITEM_TYPES 3
+#include "objects.h"
 
 
 int main() {
@@ -55,6 +56,8 @@ int main() {
     int running = 1;
     int in_menu = 1;
     int in_settings = 0;
+    int selected_item = -1;
+
     while(running){
         int playing = 1;
         while(in_menu){
@@ -118,7 +121,7 @@ int main() {
             printf("Erreur d'allocation de mémoire pour items\n");
             exit(1);
         }
-        load_item_textures(renderer, items);
+        
         // selection aléatoire du fond d'écran
         int index = randomMapIndex();
         char *map = getMapFromIndex(index);
@@ -138,7 +141,7 @@ int main() {
 
         // liberer la mémoire allouée a map
         free(map);
-        // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pr le zombie
+        // J'ai bougé le free du collisionTableFileName à la fin parce que j'en ai besoin pour le zombie
 
         // Charger la texture des attaques
         SDL_Texture *attacksTexture;
@@ -175,20 +178,23 @@ int main() {
         SDL_Rect* characterRectsrc;
         get_frames(&characterRectsrc, 32, 32, character_max_line_frame, character_max_column_frame);
 
-        
-        // Initialisation d'un 1er objet : un fromage
-        Object cheese = {
-            .x = 50,
-            .y = 50,
-            .height = 100,
-            .width = 100,
-            .ground = 1,
-            .type = 0
-        };
+        // Initialiser les variables pour les objets aléatoires
+        Object randomObjects[MAX_RANDOM_OBJECTS];
+        int numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
 
-        // Charger la texture du fromage
-        SDL_Texture *cheeseTexture;
-        get_texture(&cheeseTexture, "assets/cheese.png", renderer);
+        // Générer aléatoirement les objets
+        for (int i = 0; i < numRandomObjects; i++) {
+            int randX = rand() % SCREEN_WIDTH;
+            int randY = rand() % SCREEN_HEIGHT;
+            int randType = rand() % MAX_ITEM_TYPES;
+            randomObjects[i] = init_object(randX, randY, 100, 100, randType, 1, NULL);
+            char objectPath[50];
+            sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
+            SDL_Texture* item_texture = get_texture(objectPath, renderer);
+            randomObjects[i].texture = item_texture;
+            randomObjects[i].type = randType;
+        }
+
 
         int zombieNumber = 4;
         int zombieRemaining = 0;
@@ -237,8 +243,6 @@ int main() {
         int attack_dispo = 1;
         int attack_flag = 0;
 
-        int cheeseAdded = 0;
-
         // flags pour animation
         int direction = 0;
         int character_animation_frame = 0;//quel etape du cycle d'animation
@@ -260,11 +264,13 @@ int main() {
                         running = 0;
                         playing = 0;
                         break;
+
                     case SDL_MOUSEMOTION:
                         // Récupération des coordonnées de la souris
                         mouseX = event.motion.x;
                         mouseY = event.motion.y;
                         break;
+
                     case SDL_KEYDOWN:
                         switch (event.key.keysym.sym) {
                             // Pour chaque touche de déplacement on met le booléen
@@ -273,19 +279,19 @@ int main() {
                                 game_in_pause = 1;
                                 key_left_pressed = 0;
                                 key_right_pressed = 0;
-                                key_up_pressed = 0;
                                 key_down_pressed = 0;
                                 break;
+                            case SDLK_r:
+                                playing = 0;
+                                break;
+
                             case SDLK_e:
-                                // Vérifier si les coordonnées du personnage se trouvent dans la zone du fromage avec une marge de tolérance
-                                if (!cheeseAdded && character.x + character.width >= cheese.x && character.x <= cheese.x + cheese.width &&
-                                    character.y + character.height >= cheese.y && character.y <= cheese.y + cheese.height) {
-                                    add_to_inventory(&character.inventory, cheese);
-                                    cheese.ground = 0; 
-                                    SDL_DestroyTexture(cheeseTexture);
-                                    cheeseAdded = 1;
+                                // Vérifier les collisions avec tous les objets
+                                for (int i = 0; i < numRandomObjects; i++) {
+                                    check_object_collision(&randomObjects[i], &character);
                                 }
                                 break;
+
                             case SDLK_q:
                                 key_left_pressed = 1;
                                 break;
@@ -301,8 +307,30 @@ int main() {
                             case SDLK_SPACE:
                                 key_space_pressed = 1;
                                 break;
+
+                            case SDLK_1:
+                                selected_item = 0;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_2: 
+                                selected_item = 1;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_3: 
+                                selected_item = 2;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_4:
+                                selected_item = 3;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
+                            case SDLK_5:
+                                selected_item = 4;
+                                use_object(&character, &character.inventory.items[selected_item], selected_item);
+                                break;
                         }
                         break;
+
                     case SDL_KEYUP:
                         switch (event.key.keysym.sym) {
                             // Pour chaque touche de déplacement on met le booléen
@@ -329,6 +357,22 @@ int main() {
 
             if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
                 direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
+            }
+
+           // Mettre à jour la variable selected_item en fonction des touches appuyées
+            if (event.key.keysym.sym == SDLK_1) {
+                selected_item = 0;
+            } else if (event.key.keysym.sym == SDLK_2) { 
+                selected_item = 1;
+            } else if (event.key.keysym.sym == SDLK_3) { 
+                selected_item = 2;
+            } else if (event.key.keysym.sym == SDLK_4) {
+                selected_item = 3;
+            } else if (event.key.keysym.sym == SDLK_5) {
+                selected_item = 4;
+            } else {
+                // Réinitialiser la variable selected_item si aucune touche d'inventaire n'est appuyée
+                selected_item = -1;
             }
 
             // rendu graphique
@@ -410,9 +454,14 @@ int main() {
                 }
             }
 
-            // Rendu du fromage
-            SDL_Rect cheeseRect = {(int)cheese.x, (int)cheese.y, cheese.width, cheese.height};
-            SDL_RenderCopy(renderer, cheeseTexture, NULL, &cheeseRect);
+            // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
+            for (int i = 0; i < numRandomObjects; i++) {
+                if (randomObjects[i].ground) { 
+                    SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
+                    SDL_Texture *objectTexture = randomObjects[i].texture;
+                    SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
+                }
+            }
 
             if(character.health<=20){
                 if( startTime-low_on_life_time>200){
@@ -499,11 +548,14 @@ int main() {
         
         // Libérer la mémoire et quitter SDL
 
-
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
-        SDL_DestroyTexture(cheeseTexture);
+        SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
+
+        for (int i = 0; i < numRandomObjects; i++) {
+            SDL_DestroyTexture(randomObjects[i].texture);
+        }
 
         free(characterRectsrc);
         free(attacksRectsrc);
