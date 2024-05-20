@@ -190,7 +190,8 @@ int main() {
             randomObjects[i] = init_object(randX, randY, 100, 100, randType, 1, NULL);
             char objectPath[50];
             sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
-            SDL_Texture* item_texture = get_texture(objectPath, renderer);
+            SDL_Texture* item_texture;
+            get_texture(&item_texture, objectPath, renderer);
             randomObjects[i].texture = item_texture;
             randomObjects[i].type = randType;
         }
@@ -550,7 +551,6 @@ int main() {
 
         SDL_DestroyTexture(backgroundTexture);
         SDL_DestroyTexture(characterTexture);
-        SDL_DestroyTexture(zombieTexture);
         SDL_DestroyTexture(inventoryTexture);
 
         for (int i = 0; i < numRandomObjects; i++) {
