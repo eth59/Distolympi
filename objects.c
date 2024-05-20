@@ -62,28 +62,3 @@ int check_object_collision(Object* object, Character* character) {
     }
     return 0;
 }
-
-// Générer des coordonnées aléatoires dans la plage de la carte
-void generate_random_coordinates(Object *object, int width, int height) {
-    object->x = rand() % (SCREEN_WIDTH - width);
-    object->y = rand() % (SCREEN_HEIGHT - height);
-}
-
-// Générer un nombre aléatoire entre 0 et le nombre maximal d'objets - 1
-int generate_random_item_type() {
-    return rand() % MAX_ITEM_TYPES;
-}
-
-void generate_random_objects(Object *objects, int num_objects, int width, int height) {
-    for (int i = 0; i < num_objects; i++) {
-        // Sélectionner aléatoirement le type d'objet
-        int type = generate_random_item_type();
-        
-        // Initialiser l'objet avec des coordonnées aléatoires et le type sélectionné
-        Object object = init_object(0, 0, width, height, type, 1, NULL);
-        generate_random_coordinates(&object, width, height);
-        
-        // Copier l'objet généré dans le tableau d'objets
-        objects[i] = object;
-    }
-}

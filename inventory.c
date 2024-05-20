@@ -5,12 +5,13 @@
 #include "animations.h"
 #include "inventory.h"
 
-// Fonction pour initialiser l'inventaire
+
+// Initialisation de l'inventaire
 void init_inventory(Inventory *inventory) {
     inventory->count = 0;
 }
 
-// Fonction pour ajouter un objet à l'inventaire
+// Ajout d'un objet à l'inventaire
 void add_to_inventory(Inventory *inventory, Object *object) {
     // Vérifier si l'inventaire est plein
     if (inventory->count >= MAX_INVENTORY_SIZE) {
@@ -21,46 +22,22 @@ void add_to_inventory(Inventory *inventory, Object *object) {
     inventory->count++;
 }
 
-// Fonction pour charger les textures des objets
-void load_item_textures(SDL_Renderer* renderer, Item* items, char* item_path, int type, int index, Object* randomObjects) {
-    SDL_Texture* item_texture = get_texture(item_path, renderer);
-    if (item_texture == NULL) {
-        printf("Erreur : impossible de charger la texture de l'objet %d\n", index);
-        exit(1);
-    }
-    items[index].texture = item_texture;
-    items[index].type = type;
-}
-
-
 void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {
-    // Définir la position et la taille de l'inventaire
     SDL_Rect inventoryRect = {0, SCREEN_HEIGHT - SCREEN_HEIGHT/9, SCREEN_WIDTH, SCREEN_HEIGHT/9};
-
     // Dessiner un rectangle temporaire à la position et à la taille de l'inventaire
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &inventoryRect);
-
-    // Dessiner la barre d'inventaire
     SDL_RenderCopy(renderer, inventoryTexture, NULL, &inventoryRect);
 
     // Définir la position et la taille d'un slot d'inventaire
     SDL_Rect slotRect = {10, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, SCREEN_WIDTH/16 - 20, SCREEN_HEIGHT/9 - 20};
 
-    // Parcourir tous les slots d'inventaire
     for (int i = 0; i < MAX_INVENTORY_SIZE; i++) {
-        // Vérifier si le slot d'inventaire est occupé
         if (i < character.inventory.count) {
-            // Récupérer la texture de l'item dans le tableau
-            SDL_Texture* itemTexture = items[character.inventory.items[i].type].texture;
-
-            // Définir la position et la taille de l'objet dans le slot
+            SDL_Texture* itemTexture = character.inventory.items[i].texture;
             SDL_Rect itemRect = {slotRect.x, slotRect.y, SCREEN_WIDTH/16 - 20, SCREEN_HEIGHT/9 - 20};
-
-            // Dessiner l'item
             SDL_RenderCopy(renderer, itemTexture, NULL, &itemRect);
         }
-
         // Déplacer le rectangle du slot vers la droite pour le prochain slot
         slotRect.x += 200;
     }

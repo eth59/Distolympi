@@ -171,27 +171,13 @@ int main() {
         for (int i = 0; i < numRandomObjects; i++) {
             int randX = rand() % SCREEN_WIDTH;
             int randY = rand() % SCREEN_HEIGHT;
-            int randWidth = rand() % MAX_OBJECT_WIDTH + MIN_OBJECT_WIDTH;
-            int randHeight = rand() % MAX_OBJECT_HEIGHT + MIN_OBJECT_HEIGHT;
             int randType = rand() % MAX_ITEM_TYPES;
-            randomObjects[i] = init_object(randX, randY, randWidth, randHeight, randType, 1, NULL);
+            randomObjects[i] = init_object(randX, randY, 100, 100, randType, 1, NULL);
             char objectPath[50];
             sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
-            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i, &randomObjects[i]);
-        }
-
-
-        // Charger les textures pour les objets aléatoires
-        for (int i = 0; i < numRandomObjects; i++) {
-            char objectPath[50];
-            sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
-            load_item_textures(renderer, items, objectPath, randomObjects[i].type, i, &randomObjects[i]);
-        }
-
-       // Rendu des objets aléatoires
-        for (int i = 0; i < numRandomObjects; i++) {
-            SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
-            SDL_RenderCopy(renderer, randomObjects[i].texture, NULL, &objectRect); 
+            SDL_Texture* item_texture = get_texture(objectPath, renderer);
+            randomObjects[i].texture = item_texture;
+            randomObjects[i].type = randType;
         }
 
 
@@ -271,9 +257,7 @@ int main() {
                             case SDLK_e:
                                 // Vérifier les collisions avec tous les objets
                                 for (int i = 0; i < numRandomObjects; i++) {
-                                    if (check_object_collision(&randomObjects[i], &character)) {
-                                        randomObjects[i].ground = 0;
-                                    }
+                                    check_object_collision(&randomObjects[i], &character);
                                 }
                                 break;
 
@@ -434,7 +418,7 @@ int main() {
 
             // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
             for (int i = 0; i < numRandomObjects; i++) {
-                if (randomObjects[i].ground) { // Vérifier si l'objet est au sol et peut être ramassé
+                if (randomObjects[i].ground) { 
                     SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
                     SDL_Texture *objectTexture = randomObjects[i].texture;
                     SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
