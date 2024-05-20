@@ -12,7 +12,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, SDL_Texture **zombieTex
     // Chargement de la texture
     if (isAShooter)
     {
-        *zombieTexture = get_texture("assets/male.png", renderer);
+        *zombieTexture = get_texture("assets/zombie2.png", renderer);
     } else {
         *zombieTexture = get_texture("assets/zombie.png", renderer);
     }
