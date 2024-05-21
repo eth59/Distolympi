@@ -282,9 +282,6 @@ int main() {
                                 key_right_pressed = 0;
                                 key_down_pressed = 0;
                                 break;
-                            case SDLK_r:
-                                playing = 0;
-                                break;
 
                             case SDLK_e:
                                 // Vérifier les collisions avec tous les objets
