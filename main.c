@@ -9,8 +9,6 @@
 #include "enemies.h"
 #include "inventory.h"
 #include "randomSpawn.h"
-
-#define MAX_ITEM_TYPES 3
 #include "objects.h"
 
 
@@ -178,30 +176,10 @@ int main() {
         SDL_Rect* characterRectsrc;
         get_frames(&characterRectsrc, 32, 32, character_max_line_frame, character_max_column_frame);
 
-        // Initialiser les variables pour les objets aléatoires
-        Object randomObjects[MAX_RANDOM_OBJECTS];
+        // Génération d'objets aléatoirement
         int numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
-
-        // Générer aléatoirement les objets
-        for (int i = 0; i < numRandomObjects; i++) {
-            int indexHole = randomInt(tailleMapHoles/MAX_RANDOM_OBJECTS);
-            indexHole = indexHole + i*tailleMapHoles/MAX_RANDOM_OBJECTS;
-            int tileNumber = tabMapHoles[indexHole];
-            int xCoord;
-            int yCoord;     
-            getCoordFromTiles(tileNumber, &xCoord, &yCoord);    
-            xCoord = xCoord*(SCREEN_WIDTH/16);
-            yCoord = yCoord*(SCREEN_HEIGHT/9);
-            int randType = rand() % MAX_ITEM_TYPES;
-            randomObjects[i] = init_object(xCoord, yCoord, 100, 100, randType, 1, NULL);
-            char objectPath[50];
-            sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
-            SDL_Texture* item_texture;
-            get_texture(&item_texture, objectPath, renderer);
-            randomObjects[i].texture = item_texture;
-            randomObjects[i].type = randType;
-        }
-
+        Object randomObjects[MAX_RANDOM_OBJECTS];
+        generate_random_objects(tailleMapHoles, tabMapHoles, renderer, numRandomObjects, randomObjects);
 
         int zombieNumber = 4;
         int zombieRemaining = 0;

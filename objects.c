@@ -62,3 +62,27 @@ int check_object_collision(Object* object, Character* character) {
     }
     return 0;
 }
+
+Object* generate_random_objects(int tailleMapHoles, int* tabMapHoles, SDL_Renderer* renderer, int numRandomObjects, Object* randomObjects) {
+    // Générer aléatoirement les objets
+    for (int i = 0; i < numRandomObjects; i++) {
+        int indexHole = randomInt(tailleMapHoles/MAX_RANDOM_OBJECTS);
+        indexHole = indexHole + i*tailleMapHoles/MAX_RANDOM_OBJECTS;
+        int tileNumber = tabMapHoles[indexHole];
+        int xCoord;
+        int yCoord;     
+        getCoordFromTiles(tileNumber, &xCoord, &yCoord);    
+        xCoord = xCoord*(SCREEN_WIDTH/16);
+        yCoord = yCoord*(SCREEN_HEIGHT/9);
+        int randType = rand() % MAX_ITEM_TYPES;
+        randomObjects[i] = init_object(xCoord, yCoord, 100, 100, randType, 1, NULL);
+        char objectPath[50];
+        sprintf(objectPath, "assets/object%d.png", randomObjects[i].type);
+        SDL_Texture* item_texture;
+        get_texture(&item_texture, objectPath, renderer);
+        randomObjects[i].texture = item_texture;
+        randomObjects[i].type = randType;
+    }
+
+    return randomObjects;
+}
