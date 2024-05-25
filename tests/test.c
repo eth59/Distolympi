@@ -3,6 +3,9 @@
 #include "testObjects.h"
 #include "testAnimations.h"
 #include "testCharacter.h"
+#include "testSelectRandomMap.h"
+#include "testCollisionHandling.h"
+#include "../Unity/src/unity.h"
 
 void setUp()
 {
@@ -32,6 +35,15 @@ int main(void) {
     RUN_TEST(test_get_direction_and_move);
     RUN_TEST(test_get_Rectdest_attacks);
     RUN_TEST(test_get_melee_direction);
+
+    // tests pour collisionHandling
+    RUN_TEST(test_openCollisionFile);
+    RUN_TEST(test_checkCollision);
+
+    // tests pour la séléction aléatoire de la map
+    RUN_TEST(test_randomMapIndex);
+    RUN_TEST(test_getMapFromIndex);
+    RUN_TEST(test_getColliderTable);
 
     UNITY_END();
     return 0;
