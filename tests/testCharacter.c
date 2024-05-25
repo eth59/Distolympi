@@ -6,6 +6,51 @@
 #include "../characters.h"
 #include "testCharacter.h"
 
+void test_moveCharacter() {
+    Character character = {
+            .x = 0,
+            .y = 0,
+            .width = SCREEN_WIDTH/16 ,
+            .height =SCREEN_HEIGHT/9,
+            .speed = 2,
+            .hitBoxHeight = SCREEN_HEIGHT/36,
+            .hitBoxWidth = SCREEN_WIDTH/32,
+            .xHitBox = SCREEN_WIDTH/2 + SCREEN_WIDTH/64,
+            .yHitBox = SCREEN_HEIGHT/2 + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36,
+            .attack_speed = 0.5,
+            .health = 100,
+            .max_health = 100,
+            .attack_damage = 10,
+            .inventory = {0}
+        };
+    char *collisionTable = "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
+    SDL_DisplayMode displayMode = {0};
+    moveCharacter(&character, displayMode, 0.5, 0.5, collisionTable);
+    TEST_ASSERT_EQUAL_FLOAT(0.5, character.x);
+    TEST_ASSERT_EQUAL_FLOAT(0.5, character.y);
+
+    Character character2 = {
+        .x = SCREEN_WIDTH/32,
+        .y = 0,
+        .width = SCREEN_WIDTH/16 ,
+        .height =SCREEN_HEIGHT/9,
+        .speed = 2,
+        .hitBoxHeight = SCREEN_HEIGHT/36,
+        .hitBoxWidth = SCREEN_WIDTH/32,
+        .xHitBox = SCREEN_WIDTH/32 + SCREEN_WIDTH/64,
+        .yHitBox = SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36,
+        .attack_speed = 0.5,
+        .health = 100,
+        .max_health = 100,
+        .attack_damage = 10,
+        .inventory = {0}
+    };
+
+    moveCharacter(&character2, displayMode, 0.5, 0.5, collisionTable);
+    TEST_ASSERT_EQUAL_FLOAT(SCREEN_WIDTH/32, character2.x);
+    TEST_ASSERT_EQUAL_FLOAT(0.5, character2.y);
+}
+
 // Test cases for get_direction_and_move function
 void test_get_direction_and_move(void) {
     Character character = {
