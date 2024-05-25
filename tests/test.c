@@ -23,7 +23,7 @@ void tearDown()
 int main(void) {
     UNITY_BEGIN();
 
-    // tests pour l'inventaire
+    // tests pour les objets
     printf("\n-----------------------\n");
     printf("Test Objects\n");
     RUN_TEST(test_init_objects);
@@ -31,7 +31,7 @@ int main(void) {
     RUN_TEST(test_check_object_collision);
     RUN_TEST(test_generate_random_objects);
 
-    // Inventory
+    // tests pour l'inventaire
     printf("\n-----------------------\n");
     printf("Test Inventory\n");
     RUN_TEST(test_init_inventory);
