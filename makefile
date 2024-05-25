@@ -8,9 +8,9 @@ SRC_TEST = tests/test.c $(FILES) tests/testInventory.c tests/testObjects.c
 UNITY_SRC = Unity/src/unity.c
 
 EXE = main
-TEST = test
+TEST = few_tests
 
-all: run tests
+all: run test
 
 $(EXE): $(SRC)
 	$(CC) $(SRC) $(CFLAGS) $(LIBS) -o $(EXE)
@@ -21,7 +21,7 @@ $(TEST): $(SRC_TEST)
 run: $(EXE)
 	@./$(EXE)
 
-tests: $(TEST)
+test: $(TEST)
 	@./$(TEST)
 
 clean:
