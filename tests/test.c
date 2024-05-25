@@ -48,6 +48,7 @@ int main(void) {
     // test pour le character
     printf("\n-----------------------\n");
     printf("Test Character\n");
+    RUN_TEST(test_moveCharacter);
     RUN_TEST(test_get_direction_and_move);
     RUN_TEST(test_get_Rectdest_attacks);
     RUN_TEST(test_get_melee_direction);
