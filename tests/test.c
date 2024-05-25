@@ -1,5 +1,7 @@
 #include "testInventory.h"
 #include "testObjects.h"
+#include "testSelectRandomMap.h"
+#include "testCollisionHandling.h"
 #include "../Unity/src/unity.h"
 
 void setUp()
