@@ -367,6 +367,36 @@ int main() {
             SDL_Rect backgroundRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT-120};
             SDL_RenderCopy(renderer, backgroundTexture, NULL, NULL);
 
+            // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
+            for (int i = 0; i < numRandomObjects; i++) {
+                if (randomObjects[i].ground) { 
+                    SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
+                    SDL_Texture *objectTexture = randomObjects[i].texture;
+                    SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
+                }
+            }
+            
+            if(character.health<=0){
+                if(death_time==0){
+                    death_time = SDL_GetTicks();
+                }
+                SDL_Texture* death_menu_texture;
+                get_texture(&death_menu_texture, "assets/Wasted.png", renderer);
+                SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
+                SDL_DestroyTexture(characterTexture);
+                if(SDL_GetTicks()-death_time>3000){
+                    playing = 0;
+                    in_menu = 1;
+                }
+            }
+            else { for (int i = 0; i < zombieNumber; i++) {
+                if(zombieTab[i]->health <= 0 ){
+                zombieTab[i]->speed = 0;
+                SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDestTab[i]);
+            }
+            }
+            }
+
             for (int i = 0; i < zombieNumber; i++) {
                 if(zombieTab[i]->health>0){
                     // Actions mobs & gestion interaction
@@ -436,15 +466,6 @@ int main() {
                 }
             }
 
-            // Dessiner tous les objets générés aléatoirement qui n'ont pas été ramassés
-            for (int i = 0; i < numRandomObjects; i++) {
-                if (randomObjects[i].ground) { 
-                    SDL_Rect objectRect = {(int)randomObjects[i].x, (int)randomObjects[i].y, randomObjects[i].width, randomObjects[i].height};
-                    SDL_Texture *objectTexture = randomObjects[i].texture;
-                    SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
-                }
-            }
-
             if(character.health<=20){
                 if( startTime-low_on_life_time>200){
                     low_on_life_time = startTime;
@@ -456,27 +477,6 @@ int main() {
                     }
                 }
                 SDL_RenderCopy(renderer,low_on_life_texture,NULL,&backgroundRect);
-            }
-
-            if(character.health<=0){
-                if(death_time==0){
-                    death_time = SDL_GetTicks();
-                }
-                SDL_Texture* death_menu_texture;
-                get_texture(&death_menu_texture, "assets/Wasted.png", renderer);
-                SDL_RenderCopy(renderer,death_menu_texture,NULL,NULL);
-                SDL_DestroyTexture(characterTexture);
-                if(SDL_GetTicks()-death_time>3000){
-                    playing = 0;
-                    in_menu = 1;
-                }
-            }
-            else { for (int i = 0; i < zombieNumber; i++) {
-                if(zombieTab[i]->health <= 0 ){
-                zombieTab[i]->speed = 0;
-                SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDestTab[i]);
-            }
-            }
             }
 
             // On dessine le personnage tout a la fin pour que la texture soit au dessus de toutes les autres
