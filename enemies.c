@@ -506,5 +506,7 @@ void free_zombie(Enemy *zombie)
         free(current);
         current = next;
     }
+    SDL_DestroyTexture(zombie->texture);
+    free(zombie->rectSrc);
     free(zombie);
 }

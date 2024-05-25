@@ -1,5 +1,7 @@
 #include <SDL2/SDL.h>
 #include "structures.h"
+#include "animations.h"
+#include "randomSpawn.h"
 #include "objects.h"
 #include "inventory.h"
 
