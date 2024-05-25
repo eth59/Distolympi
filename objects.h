@@ -3,7 +3,7 @@
 #define MAX_OBJECT_HEIGHT 100
 #define MIN_OBJECT_WIDTH 50
 #define MIN_OBJECT_HEIGHT 50
-#define MAX_ITEM_TYPES 3
+#define MAX_ITEM_TYPES 4
 
 Object init_object(float x, float y, int width, int height, int type, int ground, SDL_Texture* texture);
 void use_object(Character *character, Object *object, int selected_item);
