@@ -46,8 +46,8 @@ typedef struct {
 
 void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tailleMapHoles, int *tabMapHoles, int zombieIndex, int zombieNumber);
 void addMedal(Enemy* zombie, Medal medal);
-void removeMedal(Enemy* zombie, Medal medal);
 void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer);
+void removeMedal(Enemy* zombie, Medal medal);
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer);
 int zombie_is_in_range(Enemy *zombie, Character *player);
 double calculateShootingAngle(Enemy *zombie, Character *player);
@@ -58,5 +58,6 @@ int **readMapCollisionFile(char *fileName);
 float **mapToGraph(int **map);
 int minDistance(float dist[], int vu[]);
 int dijkstra(float **graph, int src, int dest);
+int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight);
 void pathfinding(Enemy *zombie, Character *character, char *collisionTableFileName);
 void free_zombie(Enemy *zombie);

@@ -1,0 +1,15 @@
+void test_init_zombie();
+void test_add_medal();
+void test_init_medal();
+void test_remove_medal();
+void test_zombie_is_in_range();
+void test_calculate_shooting_angle();
+void test_zombie_attack();
+void test_medal_touch_player();
+void test_move_zombie();
+void test_read_map_collision_file();
+void test_map_to_graph();
+void test_min_distance();
+void test_dijkstra();
+void test_get_sommet();
+void test_pathfinding();

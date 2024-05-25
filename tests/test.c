@@ -1,4 +1,5 @@
 #include "../Unity/src/unity.h"
+#include "testEnemies.h"
 #include "testInventory.h"
 #include "testObjects.h"
 #include "testAnimations.h"
@@ -22,28 +23,58 @@ void tearDown()
 int main(void) {
     UNITY_BEGIN();
 
-    /*RUN_TEST(test_init_objects);
-    //RUN_TEST(test_use_selected_objects_and_use_object);
-    RUN_TEST(test_check_object_collision);
-    RUN_TEST(test_generate_random_objects);
+    // tests pour l'inventaire
+    printf("\n-----------------------\n");
+    printf("Test Inventory\n");
+    RUN_TEST(test_init_objects);
+    // RUN_TEST(test_use_selected_objects_and_use_object);
+    // RUN_TEST(test_check_object_collision);
+    // RUN_TEST(test_generate_random_objects);
 
-    */
+    // tests pour les animations
+    printf("\n-----------------------\n");
+    printf("Test Animations\n");
     RUN_TEST(test_get_texture_valid_image);
     RUN_TEST(test_get_frames);
 
-    //
+    // test pour le character
+    printf("\n-----------------------\n");
+    printf("Test Character\n");
     RUN_TEST(test_get_direction_and_move);
     RUN_TEST(test_get_Rectdest_attacks);
     RUN_TEST(test_get_melee_direction);
 
     // tests pour collisionHandling
+    printf("\n-----------------------\n");
+    printf("Test Collision Handling\n");
     RUN_TEST(test_openCollisionFile);
     RUN_TEST(test_checkCollision);
 
     // tests pour la séléction aléatoire de la map
+    printf("\n-----------------------\n");
+    printf("Test Selection Random Map\n");
     RUN_TEST(test_randomMapIndex);
     RUN_TEST(test_getMapFromIndex);
     RUN_TEST(test_getColliderTable);
+
+    // tests pour les enemies
+    printf("\n-----------------------\n");
+    printf("Test Enemies\n");
+    RUN_TEST(test_init_zombie);
+    RUN_TEST(test_add_medal);
+    RUN_TEST(test_init_medal);
+    RUN_TEST(test_remove_medal);
+    RUN_TEST(test_zombie_is_in_range);
+    RUN_TEST(test_calculate_shooting_angle);
+    RUN_TEST(test_zombie_attack);
+    RUN_TEST(test_medal_touch_player);
+    RUN_TEST(test_move_zombie);
+    RUN_TEST(test_read_map_collision_file);
+    RUN_TEST(test_map_to_graph);
+    RUN_TEST(test_min_distance);
+    RUN_TEST(test_dijkstra);
+    RUN_TEST(test_get_sommet);
+    RUN_TEST(test_pathfinding);
 
     UNITY_END();
     return 0;

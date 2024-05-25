@@ -25,7 +25,6 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tai
     getCoordFromTiles(tileNumber, &xCoord, &yCoord);    
     xCoord = xCoord*(SCREEN_WIDTH/16);
     yCoord = yCoord*(SCREEN_HEIGHT/9);
-
     (*zombie)->x = xCoord;
     (*zombie)->y = yCoord;
     (*zombie)->width = SCREEN_WIDTH / 16;
@@ -56,25 +55,6 @@ void addMedal(Enemy* zombie, Medal medal) {
     zombie->medals = newMedalList;
 }
 
-void removeMedal(Enemy* zombie, Medal medal) {
-    MedalList* current = zombie->medals;
-    MedalList* previous = NULL;
-
-    while (current != NULL) {
-        if (current->medal.x == medal.x && current->medal.y == medal.y) {
-            if (previous == NULL) {
-                zombie->medals = current->next;
-            } else {
-                previous->next = current->next;
-            }
-            free(current);
-            return;
-        }
-        previous = current;
-        current = current->next;
-    }
-}
-
 void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer) 
 {
     // Création de la médaille
@@ -101,6 +81,25 @@ void init_medal(Enemy *zombie, Character *player, SDL_Renderer *renderer)
 
     // Ajout de la médaille à la liste des médailles
     addMedal(zombie, medal);
+}
+
+void removeMedal(Enemy* zombie, Medal medal) {
+    MedalList* current = zombie->medals;
+    MedalList* previous = NULL;
+
+    while (current != NULL) {
+        if (current->medal.x == medal.x && current->medal.y == medal.y) {
+            if (previous == NULL) {
+                zombie->medals = current->next;
+            } else {
+                previous->next = current->next;
+            }
+            free(current);
+            return;
+        }
+        previous = current;
+        current = current->next;
+    }
 }
 
 void render_zombie(Enemy *zombie, SDL_Renderer *renderer)
@@ -396,11 +395,13 @@ int minDistance(float dist[], int vu[])
     int min_index;
 
     for (int v = 0; v < V; v++)
+    {
         if (!vu[v] && dist[v] <= min)
         {
             min = dist[v];
             min_index = v;
         }
+    }
     return min_index;
 }
 
@@ -446,7 +447,8 @@ int dijkstra(float **graph, int src, int dest)
 } 
 
 // Calcul du sommet à partir de la position
-int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight) {
+int get_sommet(int x, int y, int hitboxWidth, int hitboxHeight)
+{
     int tileWidth = 1920 / (MAP_WIDTH+2);
     int tileHeight = 1080 / (MAP_HEIGHT+3);
     int tileX = (x + hitboxWidth/2) / tileWidth - 1;
