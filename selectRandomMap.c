@@ -19,7 +19,13 @@ char *getMapFromIndex(int index) {
     //initialise la chaine qui contient l'extension
     char ext[] = ".png";
     //intialise la variable qui contient l'index en chaine de caractère
-    char charIndex[2]; 
+    int temp;
+    if (index >= 10) {
+        temp = 3;
+    } else {
+        temp = 2;
+    }
+    char charIndex[temp]; 
     //transforme l'index en chaine de caractères
     sprintf(charIndex, "%d", index);
 
