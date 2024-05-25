@@ -20,7 +20,12 @@ void test_init_objects() {
 }
 
 
-void test_use_selected_objects_and_use_object() {
+void test_use_object() {
+    // Créer un inventaire
+    Inventory* inventory = malloc(sizeof(Inventory));
+    init_inventory(inventory);
+
+    // Créer un personnage
     Character character = {
         .x = SCREEN_WIDTH / 2,
         .y = SCREEN_HEIGHT / 2,
@@ -35,29 +40,43 @@ void test_use_selected_objects_and_use_object() {
         .health = 100,
         .max_health = 100,
         .attack_damage = 10,
-        .inventory = {0}
+        .inventory = *inventory
     };
-    
-    Inventory* inventory;
-    init_inventory(inventory);
 
-    Object coffee = init_object(100,100,100,100,3,1,NULL); // café (vitesse) au sol
-    add_to_inventory(inventory, &coffee);
-    int selected_item = 1; // si l'item selectionné est le 1er de l'inventaire donc le café
+    // Créer un objet "café"
+    Object coffee = init_object(100,100,100,100,3,1,NULL);
 
-    int initial_max_health = character.max_health;
-    use_selected_object(&character,&selected_item);
+    // Ajouter l'objet à l'inventaire du personnage
+    add_to_inventory(&character.inventory, &coffee);
 
-    TEST_ASSERT_EQUAL(selected_item,-1); // café utilisé
-    TEST_ASSERT_EQUAL(coffee.type,2); // bien de la vitesse
-    TEST_ASSERT_EQUAL(character.max_health, initial_max_health+10); // effet du café sur le perso
+    // Vérifier que l'objet a été ajouté à l'inventaire
+    TEST_ASSERT_EQUAL_INT(character.inventory.count, 1);
+    TEST_ASSERT_EQUAL_INT(character.inventory.items[0].type, 3);
+
+    // Utiliser l'objet
+    int selected_item = 0;
+    use_object(&character, &character.inventory.items[selected_item], selected_item);
+
+    // Vérifier que l'objet a été supprimé de l'inventaire
+    TEST_ASSERT_EQUAL_INT(character.inventory.count, 0);
+
+    // Vérifier que la vitesse du personnage a augmenté
+    TEST_ASSERT_FLOAT_WITHIN(0.1, character.speed, 7.0);
+
+    // Libérer la mémoire allouée
+    free(inventory);
 }
 
 
 void test_check_object_collision() {
+    // Créer un inventaire
+    Inventory* inventory = malloc(sizeof(Inventory));
+    init_inventory(inventory);
+
+    // Créer un personnage
     Character character = {
-        .x = 100,
-        .y = 100,
+        .x = SCREEN_WIDTH / 2,
+        .y = SCREEN_HEIGHT / 2,
         .width = SCREEN_WIDTH/16 ,
         .height =SCREEN_HEIGHT/9,
         .speed = 2,
@@ -69,21 +88,65 @@ void test_check_object_collision() {
         .health = 100,
         .max_health = 100,
         .attack_damage = 10,
-        .inventory = {0}
+        .inventory = *inventory
     };
 
-    Object beret = init_object(100,100,100,100,2,1,NULL); // béret (défense) au sol
-    int inventory_count = character.inventory.count;
-    int res = check_object_collision(&beret,&character);
-    TEST_ASSERT_EQUAL(res,1);
-    TEST_ASSERT_EQUAL(character.inventory.count,inventory_count++);
+    // Créer un objet béret
+    Object beret = init_object(100,100,100,100,2,1,NULL);
 
-    character.x = 300;
-    character.y = 300;
-    res = check_object_collision(&beret,&character);
-    TEST_ASSERT_EQUAL(res,0);
+    // Vérifier qu'il n'y a pas de collision entre l'objet et le personnage
+    TEST_ASSERT_EQUAL_INT(check_object_collision(&beret, &character), 0);
+
+    // Déplacer l'objet pour qu'il entre en collision avec le personnage
+    beret.x = character.x + character.width / 2;
+    beret.y = character.y + character.height / 2;
+
+    // Vérifier qu'il y a une collision entre l'objet et le personnage
+    TEST_ASSERT_EQUAL_INT(check_object_collision(&beret, &character), 1);
+
+    // Vérifier que l'objet a été ajouté à l'inventaire du personnage
+    TEST_ASSERT_EQUAL_INT(character.inventory.count, 1);
+    TEST_ASSERT_EQUAL_INT(character.inventory.items[0].type, 2);
+
+    // Vérifier que l'objet n'est plus sur le sol
+    TEST_ASSERT_EQUAL_INT(beret.ground, 0);
+
+    // Libérer la mémoire allouée
+    free(inventory);
 }
 
+
 void test_generate_random_objects() {
-   // Object* randomObjects = generate_random_objects(int tailleMapHoles, int* tabMapHoles, SDL_Renderer* renderer, int numRandomObjects, Object* randomObjects) {
+    // Initialisation d'un renderer et d'une fenêtre
+    SDL_Window *window = SDL_CreateWindow("LE JEU", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!window) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in window init: %s", SDL_GetError());
+        exit(-1);
+    }
+    SDL_Renderer* renderer;
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer) {
+        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error in renderer init: %s", SDL_GetError());
+        exit(-1);
+    }
+
+    // Initialisation d'un tableau dont la fonction a besoin
+    int tailleMapHoles = 10;
+    int* tabMapHoles = malloc(tailleMapHoles * sizeof(int));
+    for (int i = 0; i < 10; i++)
+    {
+        tabMapHoles[i] = i;
+    }
+
+    int numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
+    Object randomObjects[MAX_RANDOM_OBJECTS];
+    generate_random_objects(tailleMapHoles, tabMapHoles, renderer, numRandomObjects, randomObjects);
+    for (int i=0; i<numRandomObjects; i++) {
+        TEST_ASSERT_TRUE(randomObjects[i].type >= 0 && randomObjects[i].type <= 3);
+    }
+
+    free(tabMapHoles);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
 }

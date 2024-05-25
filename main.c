@@ -113,12 +113,6 @@ int main() {
                 }
             }
         }
-        // Initialisation de l'inventaire
-        Item* items = malloc(MAX_ITEM_TYPES * sizeof(Item));
-        if (items == NULL) {
-            printf("Erreur d'allocation de mémoire pour items\n");
-            exit(1);
-        }
         
         // selection aléatoire du fond d'écran
         int index = randomMapIndex();
@@ -153,7 +147,11 @@ int main() {
         // Charger la texture du personnage
         SDL_Texture *characterTexture;
         get_texture(&characterTexture, "assets/loli.png", renderer);
-        // Initialisation du personnage
+
+        // Initialisation du personnage et de son inventaire
+        Inventory* inventory = malloc(sizeof(Inventory));
+        init_inventory(inventory);
+
         Character character = {
             .x = SCREEN_WIDTH / 2,
             .y = SCREEN_HEIGHT / 2,
@@ -168,7 +166,7 @@ int main() {
             .health = 100,
             .max_health = 100,
             .attack_damage = 10,
-            .inventory = {0}
+            .inventory = *inventory
         };
         // On divise la tileset du character 
         int character_max_column_frame=8;
@@ -483,7 +481,7 @@ int main() {
             SDL_RenderCopy(renderer, characterTexture, &characterRectsrc[direction*character_max_column_frame+character_animation_frame*key_pressed], &characterRectdest);
             
             // Dessin de l'inventaire
-            draw_inventory_bar(renderer, character, inventoryTexture, items);
+            draw_inventory_bar(renderer, character, inventoryTexture);
 
             // Dessin de la barre de vie
             draw_health_bar(renderer, SCREEN_WIDTH-820, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, character.health, character.max_health);
@@ -547,9 +545,9 @@ int main() {
         free(zombieTab);
         free(zombieRectDestTab);
         free(collisionTableFileName);
-        free(items);
         free(mapHoles);
         free(tabMapHoles);
+        free(inventory);
     }
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

@@ -3,6 +3,7 @@
 #define SCREEN_HEIGHT 1080
 #define FPS 240
 
+
 // Structure pour caractériser les objets
 typedef struct {
     float x;
@@ -14,11 +15,13 @@ typedef struct {
     SDL_Texture* texture;
 } Object;
 
+
 // Structure pour caractériser l'inventaire
 typedef struct {
     Object items[MAX_INVENTORY_SIZE];
     int count; // Nombre d'objets dans l'inventaire
 } Inventory;
+
 
 // Structure pour caractériser le personnage principal
 typedef struct {
@@ -37,9 +40,3 @@ typedef struct {
     int max_health;
     Inventory inventory;
 } Character;
-
-// Structure pour caractériser une texture
-typedef struct {
-    SDL_Texture* texture;
-    int type;
-} Item;

@@ -19,14 +19,6 @@ Object init_object(float x, float y, int width, int height, int type, int ground
     return object;
 }
 
-void use_selected_object(Character *character, int *selected_item) {
-    if (*selected_item >= 0 && *selected_item < MAX_INVENTORY_SIZE && 
-    character->inventory.items[*selected_item].ground == 0) {
-        Object *selected_object = &character->inventory.items[*selected_item];
-        use_object(character, selected_object, *selected_item);
-        *selected_item = -1; // Réinitialiser l'index de l'objet sélectionné
-    }
-}
 
 void use_object(Character *character, Object *object, int selected_item) {
     if (selected_item < 0 || selected_item >= character->inventory.count) {
@@ -49,6 +41,7 @@ void use_object(Character *character, Object *object, int selected_item) {
     character->inventory.count--;
 }
 
+
 int check_object_collision(Object* object, Character* character) {
     SDL_Rect objectRect = { (int)object->x, (int)object->y, object->width, object->height };
     SDL_Rect characterRect = { (int)character->x, (int)character->y, character->width, character->height };
@@ -64,6 +57,7 @@ int check_object_collision(Object* object, Character* character) {
     }
     return 0;
 }
+
 
 Object* generate_random_objects(int tailleMapHoles, int* tabMapHoles, SDL_Renderer* renderer, int numRandomObjects, Object* randomObjects) {
     // Générer aléatoirement les objets

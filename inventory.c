@@ -11,6 +11,7 @@ void init_inventory(Inventory *inventory) {
     inventory->count = 0;
 }
 
+
 // Ajout d'un objet à l'inventaire
 void add_to_inventory(Inventory *inventory, Object *object) {
     // Vérifier si l'inventaire est plein
@@ -22,7 +23,8 @@ void add_to_inventory(Inventory *inventory, Object *object) {
     inventory->count++;
 }
 
-void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture, Item* items) {
+
+void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture* inventoryTexture) {
     SDL_Rect inventoryRect = {0, SCREEN_HEIGHT - SCREEN_HEIGHT/9, SCREEN_WIDTH, SCREEN_HEIGHT/9};
     // Dessiner un rectangle temporaire à la position et à la taille de l'inventaire
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -42,6 +44,7 @@ void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture
         slotRect.x += 200;
     }
 }
+
 
 void draw_health_bar(SDL_Renderer* renderer, int x, int y, int current_health, int max_health) {
     // Dessiner le rectangle vide de la barre de vie
@@ -64,4 +67,3 @@ void draw_health_bar(SDL_Renderer* renderer, int x, int y, int current_health, i
     }
     SDL_RenderFillRect(renderer, &health_rect);
 }
-

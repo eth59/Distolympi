@@ -27,9 +27,15 @@ int main(void) {
     printf("\n-----------------------\n");
     printf("Test Inventory\n");
     RUN_TEST(test_init_objects);
-    // RUN_TEST(test_use_selected_objects_and_use_object);
-    // RUN_TEST(test_check_object_collision);
-    // RUN_TEST(test_generate_random_objects);
+    RUN_TEST(test_use_object);
+    RUN_TEST(test_check_object_collision);
+    // RUN_TEST(test_generate_random_objects); // data memory leaks à régler mais test fonctionnel
+
+    // Inventory
+    RUN_TEST(test_init_inventory);
+    RUN_TEST(test_add_to_inventory);
+    // RUN_TEST(test_draw_inventory_bar); // data memory leaks à régler mais test fonctionnel
+    // RUN_TEST(test_draw_health_bar);  // data memory leaks à régler mais test fonctionnel
 
     // tests pour les animations
     printf("\n-----------------------\n");
