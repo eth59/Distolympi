@@ -32,7 +32,7 @@ void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture
     SDL_RenderCopy(renderer, inventoryTexture, NULL, &inventoryRect);
 
     // Définir la position et la taille d'un slot d'inventaire
-    SDL_Rect slotRect = {10, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, SCREEN_WIDTH/16 - 20, SCREEN_HEIGHT/9 - 20};
+    SDL_Rect slotRect = {100, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, SCREEN_WIDTH/16 - 20, SCREEN_HEIGHT/9 - 20};
 
     for (int i = 0; i < MAX_INVENTORY_SIZE; i++) {
         if (i < character.inventory.count) {
@@ -41,19 +41,20 @@ void draw_inventory_bar(SDL_Renderer* renderer, Character character, SDL_Texture
             SDL_RenderCopy(renderer, itemTexture, NULL, &itemRect);
         }
         // Déplacer le rectangle du slot vers la droite pour le prochain slot
-        slotRect.x += 200;
+        slotRect.x += 300;
     }
 }
 
 
 void draw_health_bar(SDL_Renderer* renderer, int x, int y, int current_health, int max_health) {
     // Dessiner le rectangle vide de la barre de vie
-    SDL_Rect health_bar_rect = { x, y, 800, SCREEN_HEIGHT/9 - 20 };
+    int w = 500;
+    SDL_Rect health_bar_rect = { x, y, w, SCREEN_HEIGHT/9 - 20 };
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderDrawRect(renderer, &health_bar_rect);
 
     // Calculer la largeur du rectangle de santé actuel
-    int health_width = (current_health * 800) / max_health;
+    int health_width = (current_health * w) / max_health;
     if (health_width < 0) {
         health_width = 0;
     }

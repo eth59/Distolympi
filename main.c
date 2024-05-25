@@ -484,7 +484,7 @@ int main() {
             draw_inventory_bar(renderer, character, inventoryTexture);
 
             // Dessin de la barre de vie
-            draw_health_bar(renderer, SCREEN_WIDTH-820, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, character.health, character.max_health);
+            draw_health_bar(renderer, SCREEN_WIDTH-520, SCREEN_HEIGHT - SCREEN_HEIGHT/9 + 10, character.health, character.max_health);
 
             SDL_RenderPresent(renderer);
             
