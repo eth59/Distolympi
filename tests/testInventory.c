@@ -8,14 +8,6 @@
 #include "../Unity/src/unity.h"
 
 
-void setUp(void) {
-}
-
-
-void tearDown(void) {
-}
-
-
 void test_init_inventory() {
     Inventory* inventory = malloc(sizeof(Inventory));
     init_inventory(inventory);
