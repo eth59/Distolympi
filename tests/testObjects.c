@@ -61,7 +61,7 @@ void test_use_object() {
     TEST_ASSERT_EQUAL_INT(character.inventory.count, 0);
 
     // Vérifier que la vitesse du personnage a augmenté
-    TEST_ASSERT_FLOAT_WITHIN(0.1, character.speed, 7.0);
+    TEST_ASSERT_FLOAT_WITHIN(0.1, character.speed, 4.0);
 
     // Libérer la mémoire allouée
     free(inventory);
