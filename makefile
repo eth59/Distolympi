@@ -10,7 +10,8 @@ UNITY_SRC = Unity/src/unity.c
 EXE = main
 TEST = few_tests
 
-all: run test
+run: $(EXE)
+	@./$(EXE)
 
 $(EXE): $(SRC)
 	$(CC) $(SRC) $(CFLAGS) $(LIBS) -o $(EXE)
@@ -18,8 +19,7 @@ $(EXE): $(SRC)
 $(TEST): $(SRC_TEST)
 	$(CC) $(SRC_TEST) $(UNITY_SRC) $(CFLAGS) $(LIBS) -o $(TEST)
 
-run: $(EXE)
-	@./$(EXE)
+all: run test
 
 test: $(TEST)
 	@./$(TEST)
