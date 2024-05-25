@@ -1,0 +1,1 @@
+void test_init_inventory();
