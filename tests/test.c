@@ -6,6 +6,7 @@
 #include "testCharacter.h"
 #include "testSelectRandomMap.h"
 #include "testCollisionHandling.h"
+#include "testRandomSpawn.h"    
 #include "../Unity/src/unity.h"
 
 void setUp()
@@ -85,6 +86,11 @@ int main(void) {
     RUN_TEST(test_get_sommet);
     RUN_TEST(test_pathfinding);
 
+    // tests pour le spawn random
+    printf("\n-----------------------\n");
+    printf("Test spawn random\n");
+    RUN_TEST(test_getMapHoles);
+    RUN_TEST(test_getCoordFromTiles);
     UNITY_END();
     return 0;
 }
