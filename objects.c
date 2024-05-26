@@ -63,7 +63,6 @@ int check_object_collision(Object* object, Character* character) {
 
 Object* generate_random_objects(int tailleMapHoles, int* tabMapHoles, SDL_Renderer* renderer, int numRandomObjects, Object* randomObjects) {
     // Générer aléatoirement les objets
-    srandom(time(NULL));
     for (int i = 0; i < numRandomObjects; i++) {
         int indexHole = randomInt(tailleMapHoles/MAX_RANDOM_OBJECTS);
         indexHole = indexHole + i*tailleMapHoles/MAX_RANDOM_OBJECTS;
@@ -75,7 +74,7 @@ Object* generate_random_objects(int tailleMapHoles, int* tabMapHoles, SDL_Render
         getCoordFromTiles(tileNumber, &xCoord, &yCoord);    
         xCoord = xCoord*(SCREEN_WIDTH/16);
         yCoord = yCoord*(SCREEN_HEIGHT/9);
-        int randType = random() % MAX_ITEM_TYPES;
+        int randType = (random() + i) % MAX_ITEM_TYPES;
 
         randomObjects[i] = init_object(xCoord, yCoord, 100, 100, randType, 1, NULL);
         char objectPath[50];
