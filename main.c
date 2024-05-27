@@ -179,8 +179,7 @@ int main() {
         Object randomObjects[MAX_RANDOM_OBJECTS];
         generate_random_objects(tailleMapHoles, tabMapHoles, renderer, numRandomObjects, randomObjects);
 
-        int zombieNumber = 4;
-        int zombieRemaining = 0;
+        int zombieNumber = 1;
 
         Enemy **zombieTab = (Enemy **)malloc(zombieNumber*sizeof(Enemy));
         for (int i = 0; i < zombieNumber; i++)
@@ -235,8 +234,8 @@ int main() {
         int low_on_life_frame = 0;
         SDL_Texture* low_on_life_texture;
         get_texture(&low_on_life_texture, "assets/Low_life1.png", renderer);
-        int last_zombie_hit = -1000 ;
         int game_in_pause = 0;
+        int next_level=0;
         while (playing) {
             startTime = SDL_GetTicks();
 
@@ -334,9 +333,67 @@ int main() {
                         break;
                 }
             }
+            //changement de niveaux
+            int zombiedead = 0;
+            for (int i = 0; i < zombieNumber; i++)
+            {
+                if(zombieTab[i]->health<=0){
+                    zombiedead++;
+                };
+            }
+            
+            if((zombiedead==zombieNumber)&&(checkCollision(collisionTable,character.xHitBox,character.yHitBox)==2)){
+                next_level=1;
+            }
+            if(next_level){
+                printf("changement de niveaux\n");
+                next_level =0;
+                for (int i = 0; i < zombieNumber; i++) {    
+                    free_zombie(zombieTab[i]);
+                }
+                free(zombieTab);
+                free(zombieRectDestTab);
+                
+                    
+                zombieNumber++;
+                zombieTab = (Enemy **)malloc(zombieNumber*sizeof(Enemy));
+                for (int i = 0; i < zombieNumber; i++)
+                {
+                    zombieTab[i] = (Enemy *)malloc(sizeof(Enemy));
+                }
+                
+                zombieRectDestTab = (SDL_Rect *)malloc(zombieNumber*sizeof(SDL_Rect));
+
+                for (int i = 0; i < zombieNumber; i++) {
+                    if (i%2 == 0) {
+                        init_zombie(&zombieTab[i], renderer, 1, tailleMapHoles, tabMapHoles, i, zombieNumber);
+                    } else {
+                        init_zombie(&zombieTab[i], renderer, 0, tailleMapHoles, tabMapHoles, i, zombieNumber);
+                    }
+                }
+                
+                character.health = character.max_health;
+                if(character.x>SCREEN_WIDTH/2){
+                    character.x = SCREEN_WIDTH/16;
+                }
+                else{
+                    character.x = SCREEN_WIDTH*14/16;
+                }
+                character.xHitBox = character.x + SCREEN_WIDTH/64;
+                character.yHitBox = character.y + SCREEN_HEIGHT/9 - SCREEN_HEIGHT/36;
+
+                numRandomObjects = rand() % MAX_RANDOM_OBJECTS;
+                randomObjects[MAX_RANDOM_OBJECTS];
+                generate_random_objects(tailleMapHoles, tabMapHoles, renderer, numRandomObjects, randomObjects);
+            }
+
+            //****************************************
 
             if (key_up_pressed || key_down_pressed || key_left_pressed || key_right_pressed) {
                 direction=get_direction_and_move(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,displayMode, collisionTable);
+                if((zombiedead==zombieNumber)&&(get_CollisionInd(key_up_pressed,key_down_pressed,key_left_pressed,key_right_pressed,&character,collisionTable)==2)){
+                    next_level=1;
+                }
             }
 
            // Mettre à jour la variable selected_item en fonction des touches appuyées
@@ -373,6 +430,19 @@ int main() {
                     SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
                 }
             }
+            for (int i = 0; i < zombieNumber; i++) {
+                if(zombieTab[i]->health>0){
+                    // Actions mobs & gestion interaction
+                    pathfinding(zombieTab[i], &character, collisionTableFileName);
+                    move_zombie(&zombieTab[i], &character);
+                    // Rendu du zombie
+                    render_zombie(zombieTab[i], renderer);
+                }
+                zombieRectDestTab[i].x = (int)zombieTab[i]->x;
+                zombieRectDestTab[i].y = (int)zombieTab[i]->y;
+                zombieRectDestTab[i].w = zombieTab[i]->width;
+                zombieRectDestTab[i].h = zombieTab[i]->height;
+            }
             
             if(character.health<=0){
                 if(death_time==0){
@@ -395,19 +465,6 @@ int main() {
             }
             }
 
-            for (int i = 0; i < zombieNumber; i++) {
-                if(zombieTab[i]->health>0){
-                    // Actions mobs & gestion interaction
-                    pathfinding(zombieTab[i], &character, collisionTableFileName);
-                    move_zombie(&zombieTab[i], &character);
-                    // Rendu du zombie
-                    render_zombie(zombieTab[i], renderer);
-                }
-                zombieRectDestTab[i].x = (int)zombieTab[i]->x;
-                zombieRectDestTab[i].y = (int)zombieTab[i]->y;
-                zombieRectDestTab[i].w = zombieTab[i]->width;
-                zombieRectDestTab[i].h = zombieTab[i]->height;
-            }
 
             //Rendu attacks 
             if (SDL_GetTicks()-attack_time>=1000/character.attack_speed){
@@ -455,8 +512,8 @@ int main() {
             for (int i = 0; i < zombieNumber; i++) {
                 if (zombie_is_in_range(zombieTab[i], &character) && zombieTab[i]->health>0 && character.health>0) {
                     zombieTab[i]->isInsidePlayer = 1;
-                    if (SDL_GetTicks()-last_zombie_hit>=500){
-                        last_zombie_hit = SDL_GetTicks();
+                    if (((SDL_GetTicks()-zombieTab[i]->last_zombie_hit)*zombieTab[i]->attack_speed)>=500){
+                        zombieTab[i]->last_zombie_hit = SDL_GetTicks();
                         zombie_attack(zombieTab[i], &character, renderer);
                     }
                 } else {
@@ -493,34 +550,33 @@ int main() {
             deltaTime = endTime - startTime;
             if (deltaTime < 1000 / FPS) {
                 SDL_Delay((1000 / FPS) - deltaTime);
-                if(game_in_pause){
-                    SDL_Texture* game_in_pause_texture;
-                    get_texture(&game_in_pause_texture, "assets/Game-in-pause.png", renderer);
-                    SDL_RenderCopy(renderer,game_in_pause_texture,NULL,&backgroundRect);
-                    
-                    SDL_RenderPresent(renderer);
-                }
             }
+
             while(game_in_pause){
-                    if (SDL_PollEvent(&event)) {
-                        switch (event.type) {
-                            case SDL_QUIT:
-                                // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
-                                running = 0;
-                                playing = 0;
-                                game_in_pause = 0;
-                                break;
-                            case SDL_KEYDOWN:
-                                switch (event.key.keysym.sym) {
-                                    case SDLK_ESCAPE:
-                                        game_in_pause = 0;
-                                        playing = 0;
-                                        in_menu = 1;
-                                        break;
-                                    case SDLK_SPACE:
-                                        game_in_pause = 0;
-                                        break;
-                                }
+                SDL_Texture* game_in_pause_texture;
+                get_texture(&game_in_pause_texture, "assets/Game-in-pause.png", renderer);
+                SDL_RenderCopy(renderer,game_in_pause_texture,NULL,&backgroundRect);
+                
+                SDL_RenderPresent(renderer);
+                if (SDL_PollEvent(&event)) {
+                    switch (event.type) {
+                        case SDL_QUIT:
+                            // pour quitter le programme quand par exemple on appuie sur la croix de la fenêtre
+                            running = 0;
+                            playing = 0;
+                            game_in_pause = 0;
+                            break;
+                        case SDL_KEYDOWN:
+                            switch (event.key.keysym.sym) {
+                                case SDLK_ESCAPE:
+                                    game_in_pause = 0;
+                                    playing = 0;
+                                    in_menu = 1;
+                                    break;
+                                case SDLK_SPACE:
+                                    game_in_pause = 0;
+                                    break;
+                            }
                         }
                     }
                 }

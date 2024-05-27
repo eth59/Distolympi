@@ -31,7 +31,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tai
     (*zombie)->height = SCREEN_HEIGHT / 9;
     (*zombie)->currentVertex = 0;
     (*zombie)->nextVertex = 0;
-    (*zombie)->speed = 1.5;
+    (*zombie)->speed = 1;
     (*zombie)->direction = 0;
     (*zombie)->animation_frame = 0;
     (*zombie)->delay_frame = 0;
@@ -43,6 +43,8 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tai
     (*zombie)->range = (isAShooter) ? 300 : 50;
     (*zombie)->isAShooter = isAShooter;
     (*zombie)->medals = NULL;
+    (*zombie)->last_zombie_hit=-1000;
+    (*zombie)->attack_speed = (isAShooter) ? 0.5 : 1;
     
     // On divise le tileset du zombie
     get_frames(&(*zombie)->rectSrc, 32, 32, (*zombie)->max_line_frame, (*zombie)->max_column_frame);

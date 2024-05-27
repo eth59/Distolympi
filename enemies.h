@@ -39,6 +39,8 @@ typedef struct {
     int isInsidePlayer; // 1 si le zombie peut attaquer le joueur, 0 sinon
     int range; // Portée d'attaque
     int isAShooter; // 1 si le zombie peut tirer, 0 sinon
+    float attack_speed;
+    int last_zombie_hit;
     SDL_Texture *texture;
     SDL_Rect *rectSrc;
     MedalList *medals; // Liste des médailles qu'il a tiré

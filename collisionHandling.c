@@ -61,9 +61,12 @@ int checkCollision(char *collisionTable, float x, float y) {
     // on vérifie si il y a collision
     if (collisionTable[tileIndex] == '0') {
         return 0;
-    } else {
+    }
+    if (collisionTable[tileIndex] == '2') {
+        return 2;
+    } 
+    else {
         return 1;
     }    
     return 0;
 }
-

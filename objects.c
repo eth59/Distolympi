@@ -27,14 +27,14 @@ void use_object(Character *character, Object *object, int selected_item) {
         return;
     }
     if (object->type == 0) { // Si l'objet est de type nourriture, augmentation des points de vie
-        int health_increase = 10;
+        int health_increase = 20;
         character->health = fmin(character->health + health_increase, character->max_health); // sans dépasser la valeur maximale
     } else if (object->type == 1) { // Si l'objet est une arme, augmentation des dégâts d'attaque
         character->attack_damage += 10;
     } else if (object->type == 2) { // Si l'objet est un équipement défensif, augmentation de sa capacité de vie
         character->max_health += 10; 
     } else { // Si l'objet est un équipement vitesse, augmentation de la vitesse du personnage
-        character->speed += 2; 
+        character->speed += 0.5; 
     }
     // Pour supprimer l'objet de l'inventaire
     for (int i = selected_item; i < character->inventory.count - 1; i++) {

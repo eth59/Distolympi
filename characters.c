@@ -181,3 +181,61 @@ int get_melee_direction(int charX, int charY, int mouseX, int mouseY) {
 
     return direction;
 }
+
+int get_CollisionInd(int key_up_pressed ,int key_down_pressed,int key_left_pressed,int key_right_pressed,Character *character,char* collisionTable){
+    int dx;
+    int dy;
+    if (key_left_pressed && key_up_pressed) {
+        dx =-character->speed*0.7071f;
+        dy =-character->speed*0.7071f;
+    } else if (key_left_pressed && key_down_pressed) {
+        dx =-character->speed*0.7071f;
+        dy = character->speed*0.7071f;
+    } else if (key_right_pressed && key_up_pressed) {
+        dx = character->speed*0.7071f;
+        dy = -character->speed*0.7071f;
+    } else if (key_right_pressed && key_down_pressed) {
+        dx = character->speed*0.7071f;
+        dy = character->speed*0.7071f;
+    } else if (key_left_pressed) {
+        dx =-character->speed;
+        dy = 0;
+    } else if (key_right_pressed) {
+        dx =character->speed;
+        dy = 0;
+    } else if (key_up_pressed) {
+        dx = 0;
+        dy =  -character->speed;
+    } else if (key_down_pressed) {
+        dx = 0; 
+        dy = character->speed;
+    }
+    int collisionX;
+    int collisionXHeight;
+    int collisionY;
+    int collisionYWidth;
+    // On check la direction du déplacement pour savoir quel coté de la hitbox on doit vérifier
+    if (dx >= 0 && dy >= 0) {
+        // on vérifie les collisions selon les axes x et y
+        collisionX = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth + dx, character->yHitBox);
+        collisionXHeight = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth + dx, character->yHitBox + character->hitBoxHeight);
+        collisionY = checkCollision(collisionTable, character->xHitBox, character->yHitBox + character->hitBoxHeight + dy);
+        collisionYWidth = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth, character->yHitBox + character->hitBoxHeight + dy);
+    } else if (dx >= 0 && dy < 0) {
+        collisionX = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth + dx, character->yHitBox);
+        collisionXHeight = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth + dx, character->yHitBox + character->hitBoxHeight);
+        collisionY = checkCollision(collisionTable, character->xHitBox, character->yHitBox + dy);
+        collisionYWidth = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth, character->yHitBox + dy);
+    } else if (dx < 0 && dy >= 0) {
+        collisionX = checkCollision(collisionTable, character->xHitBox + dx, character->yHitBox);
+        collisionXHeight = checkCollision(collisionTable, character->xHitBox + dx, character->yHitBox + character->hitBoxHeight);
+        collisionY = checkCollision(collisionTable, character->xHitBox, character->yHitBox + character->hitBoxHeight + dy);
+        collisionYWidth = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth, character->yHitBox + character->hitBoxHeight + dy);
+    } else if (dx < 0 && dy < 0) {
+        collisionX = checkCollision(collisionTable, character->xHitBox + dx, character->yHitBox);
+        collisionXHeight = checkCollision(collisionTable, character->xHitBox + dx, character->yHitBox + character->hitBoxHeight);
+        collisionY = checkCollision(collisionTable, character->xHitBox, character->yHitBox + dy);
+        collisionYWidth = checkCollision(collisionTable, character->xHitBox + character->hitBoxWidth, character->yHitBox + dy);
+    }
+    return fmax(fmax(collisionX,collisionXHeight),fmax(collisionY,collisionYWidth));
+}
