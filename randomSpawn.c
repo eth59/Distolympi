@@ -65,9 +65,8 @@ int *convertirFichierEnTableau(const char *nomFichier, int *taille) {
             }
         }
     }
-
     // Allocation de mémoire pour le tableau d'entiers
-    int *tableau = (int *)malloc(*taille * sizeof(int));
+    int *tableau = (int *)malloc(*taille *sizeof(int));
     if (tableau == NULL) {
         fprintf(stderr, "Erreur d'allocation de mémoire\n");
         exit(1);
