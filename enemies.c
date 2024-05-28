@@ -43,7 +43,7 @@ void init_zombie(Enemy **zombie, SDL_Renderer *renderer, int isAShooter, int tai
     (*zombie)->range = (isAShooter) ? 300 : 50;
     (*zombie)->isAShooter = isAShooter;
     (*zombie)->medals = NULL;
-    (*zombie)->last_zombie_hit=-1000;
+    (*zombie)->last_zombie_hit=2000;
     (*zombie)->attack_speed = (isAShooter) ? 0.5 : 1;
     
     // On divise le tileset du zombie

@@ -430,20 +430,6 @@ int main() {
                     SDL_RenderCopy(renderer, objectTexture, NULL, &objectRect);
                 }
             }
-            for (int i = 0; i < zombieNumber; i++) {
-                if(zombieTab[i]->health>0){
-                    // Actions mobs & gestion interaction
-                    pathfinding(zombieTab[i], &character, collisionTableFileName);
-                    move_zombie(&zombieTab[i], &character);
-                    // Rendu du zombie
-                    render_zombie(zombieTab[i], renderer);
-                }
-                zombieRectDestTab[i].x = (int)zombieTab[i]->x;
-                zombieRectDestTab[i].y = (int)zombieTab[i]->y;
-                zombieRectDestTab[i].w = zombieTab[i]->width;
-                zombieRectDestTab[i].h = zombieTab[i]->height;
-            }
-            
             if(character.health<=0){
                 if(death_time==0){
                     death_time = SDL_GetTicks();
@@ -457,13 +443,30 @@ int main() {
                     in_menu = 1;
                 }
             }
-            else { for (int i = 0; i < zombieNumber; i++) {
-                if(zombieTab[i]->health <= 0 ){
-                zombieTab[i]->speed = 0;
-                SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDestTab[i]);
+            else { 
+                for (int i = 0; i < zombieNumber; i++) {
+                    if(zombieTab[i]->health <= 0 ){
+                        zombieTab[i]->speed = 0;
+                        SDL_RenderCopy(renderer,dead_zombie_texture,NULL,&zombieRectDestTab[i]);
+                    }
+                }
+                for (int i = 0; i < zombieNumber; i++) {
+                    if(zombieTab[i]->health>0){
+                        // Actions mobs & gestion interaction
+                        pathfinding(zombieTab[i], &character, collisionTableFileName);
+                        move_zombie(&zombieTab[i], &character);
+                        // Rendu du zombie
+                        render_zombie(zombieTab[i], renderer);
+                    }
+                    zombieRectDestTab[i].x = (int)zombieTab[i]->x;
+                    zombieRectDestTab[i].y = (int)zombieTab[i]->y;
+                    zombieRectDestTab[i].w = zombieTab[i]->width;
+                    zombieRectDestTab[i].h = zombieTab[i]->height;
             }
+            
             }
-            }
+            
+            
 
 
             //Rendu attacks 
