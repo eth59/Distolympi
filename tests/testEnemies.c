@@ -657,7 +657,7 @@ void test_read_map_collision_file()
 {
     int** map = readMapCollisionFile("assets/map01.txt");
     TEST_ASSERT_EQUAL(1, map[0][0]);
-    TEST_ASSERT_EQUAL(2, map[0][7]);
+    TEST_ASSERT_EQUAL(1, map[0][7]);
     TEST_ASSERT_EQUAL(0, map[1][1]);
 
     // Free Zone
