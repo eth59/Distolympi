@@ -55,12 +55,24 @@ int *convertirFichierEnTableau(const char *nomFichier, int *taille) {
     fread(contenu, sizeof(char), tailleFichier, fichier);
     fclose(fichier);
 
+    // Création d'une copie de la chaîne de caractères lue à partir du fichier
+    char *copie = (char *)malloc((tailleFichier + 1) * sizeof(char));
+    if (copie == NULL) {
+        fprintf(stderr, "Erreur d'allocation de mémoire\n");
+        exit(1);
+    }
+    strncpy(copie, contenu, tailleFichier);
+    copie[tailleFichier] = '\0';
+
+    // Libération de la mémoire allouée pour la variable contenu
+    free(contenu);
+
     // Comptons le nombre de nombres dans la chaîne de caractères
     *taille = 0;
     for (int i = 0; i < tailleFichier; i++) {
-        if (contenu[i] >= '0' && contenu[i] <= '9') {
+        if (copie[i] >= '0' && copie[i] <= '9') {
             (*taille)++;
-            while (contenu[i] >= '0' && contenu[i] <= '9') {
+            while (copie[i] >= '0' && copie[i] <= '9') {
                 i++;
             }
         }
@@ -74,17 +86,18 @@ int *convertirFichierEnTableau(const char *nomFichier, int *taille) {
 
     // Lecture des nombres depuis la chaîne de caractères et stockage dans le tableau
     int index = 0;
-    char *nombre = strtok(contenu, " ,[]");
+    char *nombre = strtok(copie, " ,[]");
     while (nombre != NULL) {
         tableau[index++] = atoi(nombre);
         nombre = strtok(NULL, " ,[]");
     }
 
-    // Libération de la mémoire allouée pour la chaîne de caractères
-    free(contenu);
+    // Libération de la mémoire allouée pour la copie de la chaîne de caractères
+    free(copie);
 
     return tableau;
 }
+
 
 void getCoordFromTiles(int tileNumber, int *xTile, int *yTile) {
     *xTile = tileNumber%16;
