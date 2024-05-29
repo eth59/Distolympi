@@ -10,13 +10,13 @@
 
 void test_init_objects() {
     Object coffee = init_object(100,100,100,100,3,1,NULL); // café (vitesse) au sol
-    TEST_ASSERT_EQUAL(coffee.x, 100);
-    TEST_ASSERT_EQUAL(coffee.y, 100);
-    TEST_ASSERT_EQUAL(coffee.width, 100);
-    TEST_ASSERT_EQUAL(coffee.height, 100);
-    TEST_ASSERT_EQUAL(coffee.type, 3);
-    TEST_ASSERT_EQUAL(coffee.ground, 1);
-    TEST_ASSERT_EQUAL(coffee.texture, NULL);
+    TEST_ASSERT_EQUAL(100, coffee.x);
+    TEST_ASSERT_EQUAL(100, coffee.y);
+    TEST_ASSERT_EQUAL(100, coffee.width);
+    TEST_ASSERT_EQUAL(100, coffee.height);
+    TEST_ASSERT_EQUAL(3, coffee.type);
+    TEST_ASSERT_EQUAL(1, coffee.ground);
+    TEST_ASSERT_EQUAL(NULL, coffee.texture);
 }
 
 
@@ -50,15 +50,15 @@ void test_use_object() {
     add_to_inventory(&character.inventory, &coffee);
 
     // Vérifier que l'objet a été ajouté à l'inventaire
-    TEST_ASSERT_EQUAL_INT(character.inventory.count, 1);
-    TEST_ASSERT_EQUAL_INT(character.inventory.items[0].type, 3);
+    TEST_ASSERT_EQUAL_INT(1, character.inventory.count);
+    TEST_ASSERT_EQUAL_INT(3, character.inventory.items[0].type);
 
     // Utiliser l'objet
     int selected_item = 0;
     use_object(&character, &character.inventory.items[selected_item], selected_item);
 
     // Vérifier que l'objet a été supprimé de l'inventaire
-    TEST_ASSERT_EQUAL_INT(character.inventory.count, 0);
+    TEST_ASSERT_EQUAL_INT(0, character.inventory.count);
 
     // Vérifier que la vitesse du personnage a augmenté
     TEST_ASSERT_FLOAT_WITHIN(0.1, character.speed, 2.5);
@@ -95,21 +95,21 @@ void test_check_object_collision() {
     Object beret = init_object(100,100,100,100,2,1,NULL);
 
     // Vérifier qu'il n'y a pas de collision entre l'objet et le personnage
-    TEST_ASSERT_EQUAL_INT(check_object_collision(&beret, &character), 0);
+    TEST_ASSERT_EQUAL_INT(0, check_object_collision(&beret, &character));
 
     // Déplacer l'objet pour qu'il entre en collision avec le personnage
     beret.x = character.x + character.width / 2;
     beret.y = character.y + character.height / 2;
 
     // Vérifier qu'il y a une collision entre l'objet et le personnage
-    TEST_ASSERT_EQUAL_INT(check_object_collision(&beret, &character), 1);
+    TEST_ASSERT_EQUAL_INT(1, check_object_collision(&beret, &character));
 
     // Vérifier que l'objet a été ajouté à l'inventaire du personnage
-    TEST_ASSERT_EQUAL_INT(character.inventory.count, 1);
-    TEST_ASSERT_EQUAL_INT(character.inventory.items[0].type, 2);
+    TEST_ASSERT_EQUAL_INT(1, character.inventory.count);
+    TEST_ASSERT_EQUAL_INT(2, character.inventory.items[0].type);
 
     // Vérifier que l'objet n'est plus sur le sol
-    TEST_ASSERT_EQUAL_INT(beret.ground, 0);
+    TEST_ASSERT_EQUAL_INT(0, beret.ground);
 
     // Libérer la mémoire allouée
     free(inventory);

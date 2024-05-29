@@ -11,7 +11,7 @@
 void test_init_inventory() {
     Inventory* inventory = malloc(sizeof(Inventory));
     init_inventory(inventory);
-    TEST_ASSERT_EQUAL(inventory->count, 0);
+    TEST_ASSERT_EQUAL(0,inventory->count);
     free(inventory);
 }
 
