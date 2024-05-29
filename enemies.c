@@ -138,7 +138,6 @@ void zombie_attack(Enemy *zombie, Character *player, SDL_Renderer *renderer)
     if (!zombie->isAShooter)
     {
         player->health = player->health - zombie->attack_damage;
-        printf("HIT! Loli's life is now %d\n",player->health);
     } else {
         init_medal(zombie, player, renderer);
     }
@@ -175,7 +174,6 @@ void move_zombie(Enemy **zombie, Character *player)
         {
             // Il faut infliger des dégâts si on touche le joueur
             player->health = player->health - (*zombie)->attack_damage;
-            printf("HIT! Loli's life is now %d\n",player->health);
             tmp = current;
             current = current->next;
             removeMedal(*zombie, tmp->medal);
