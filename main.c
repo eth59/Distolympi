@@ -493,7 +493,6 @@ int main() {
                     for (int i = 0; i < zombieNumber; i++) {
                         if (SDL_HasIntersection(&zombieRectDestTab[i], &attacksRectdest)) {
                             zombieTab[i]->health = zombieTab[i]->health - character.attack_damage;
-                            printf("HIT! Zombie's life is now %d\n",zombieTab[i]->health);
                         }
                     }
                 }
