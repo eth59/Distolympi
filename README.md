@@ -1,5 +1,5 @@
 # Distolympi
-Projet PPII2 de BERMOND Numa, CHATONNIER Nino, QUILLIOT Ethan, WERCK Hugo.
+Réalisé dans le cadre du Projet Pluridisciplinaire d'Informatique Intégrative 2 à Télécom Nancy, nous (groupe de 4) avons créé ce jeu.
 
 ## Histoire
 Les Jeux Olympiques de Paris 2024 ont tourné au cauchemar. Les nageurs les plus courageux ayant osé nager dans les eaux polluées de la Seine se sont vu contaminer par un étrange virus. Un virus qui laisse penser que la Covid-19 n'était rien à côté.
